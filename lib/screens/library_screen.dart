@@ -1,3 +1,4 @@
+import 'package:audio_player/screens/player_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
@@ -19,10 +20,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   // stores songs from the data fetched in the storage
   List<SongModel> songs = <SongModel>[];
-
-  PageStorageKey songsStorageKey =
-      const PageStorageKey('restore_songs_scroll_pos');
-  // bool isPlayerControlsWidgetVisible = false;
 
   void requestPermission() async {
     if (!kIsWeb) {
@@ -51,7 +48,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     return FutureBuilder<List<SongModel>>(
       future: _audioQuery.querySongs(
         sortType: SongSortType.DURATION,
-        orderType: OrderType.DESC_OR_GREATER,
+        orderType: OrderType.ASC_OR_SMALLER,
         uriType: UriType.EXTERNAL,
         ignoreCase: true,
       ),
@@ -65,7 +62,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
           );
         } else if (snapshot.data!.isEmpty) {
           return const Center(
-            child: Text('No Audio Found!'),
+            child: Text('No Audio Found'),
           );
         }
         songs = snapshot.data!;
@@ -73,18 +70,42 @@ class _LibraryScreenState extends State<LibraryScreen> {
           itemCount: songs.length,
           itemBuilder: (context, index) {
             // return Text(songs.elementAt(index).displayName);
+            // bool hasArtwork = _audioQuery.queryArtwork(songs.elementAt(index).id, )
             return ListTile(
-              leading: const CircleAvatar(
+              leading: CircleAvatar(
                 backgroundColor: Colors.indigo,
-                radius: 23,
-                child: Text('P'),
+                radius: 30,
+                child: QueryArtworkWidget(
+                  id: snapshot.data![index].id,
+                  type: ArtworkType.AUDIO,
+                  nullArtworkWidget: Image.asset(
+                    'images/musical_notes.png',
+                    filterQuality: FilterQuality.high,
+                    fit: BoxFit.fill,
+                    color: Colors.white,
+                  ),
+                ),
               ),
               title: Text(songs.elementAt(index).displayName),
               subtitle: Text(songs.elementAt(index).title),
-              trailing: Text(songs.elementAt(index).duration.toString()),
+              trailing: Text(songs.elementAt(index).dateAdded.toString()),
               onTap: () async {
+                if (context.mounted) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => PlayerScreen(
+                            audioPlayer: _audioPlayer,
+                            song: songs.elementAt(index),
+                            songs: songs,
+                            // sources: sources,
+                          )));
+                }
                 await _audioPlayer.setAudioSource(
-                    AudioSource.uri(Uri.parse(songs[index].uri!)));
+                  ConcatenatingAudioSource(
+                    shuffleOrder: DefaultShuffleOrder(),
+                    children: getAudioSources(songs),
+                  ),
+                  initialIndex: index,
+                );
                 await _audioPlayer.play();
               },
             );
@@ -93,4 +114,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
       },
     );
   }
+}
+
+List<AudioSource> getAudioSources(List<SongModel> songs) {
+  List<AudioSource> audioSources = [];
+  for (var song in songs) {
+    audioSources.add(AudioSource.uri(Uri.parse(song.uri!)));
+  }
+  return audioSources;
 }

@@ -20,6 +20,7 @@ dependencies:
   on_audio_query: ^2.6.2
   just_audio: ^0.9.31
   rxdart: ^0.27.7
+  audio_video_progress_bar: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -37,6 +38,8 @@ flutter:
 
   assets:
     - images/call_recorder_logo.png
+    - images/musical_notes.png
+    - images/music_music.png
 
   # example:
   # fonts:
