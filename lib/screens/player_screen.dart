@@ -320,3 +320,5 @@ class _PlayerScreenState extends State<PlayerScreen> {
     );
   }
 }
+
+// checking if the created branch is working fine
