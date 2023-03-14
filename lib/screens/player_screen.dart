@@ -1,4 +1,3 @@
-import 'package:audio_player/logics/track_manager.dart' as tm;
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,20 +9,12 @@ import '../logics/player_manager.dart' as pm;
 import '../models/duration_streams.dart';
 
 class PlayerScreen extends StatefulWidget {
-  const PlayerScreen({super.key, required this.trackIndex});
-  final int trackIndex;
+  const PlayerScreen({super.key});
   @override
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  late final int _currentTrackIndex = widget.trackIndex;
-  late SongModel _playingTrack = am.tracks[_currentTrackIndex];
-
-  _concatenating() async {
-    await tm.setConcatenatingAudioSource(am.tracks.indexOf(_playingTrack));
-  }
-
   @override
   void initState() {
     super.initState();
@@ -42,14 +33,14 @@ class _PlayerScreenState extends State<PlayerScreen> {
         centerTitle: true,
         title: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
+          children: const [
             Text(
-              _playingTrack.displayName,
-              style: const TextStyle(fontSize: 24, letterSpacing: 2),
+              'displayName',
+              style: TextStyle(fontSize: 24, letterSpacing: 2),
             ),
             Text(
-              _playingTrack.title,
-              style: const TextStyle(fontSize: 16, letterSpacing: 2),
+              'title',
+              style: TextStyle(fontSize: 16, letterSpacing: 2),
             ),
           ],
         ),
@@ -72,7 +63,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: QueryArtworkWidget(
-                    id: _playingTrack.id,
+                    id: 0,
                     type: ArtworkType.AUDIO,
                     keepOldArtwork: true,
                     artworkQuality: FilterQuality.high,
@@ -155,109 +146,17 @@ class _PlayerScreenState extends State<PlayerScreen> {
                         // crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           IconButton(
-                            onPressed: () {
-                              pm.checkLoopMode();
-
-                              // am.audioPlayer.playbackEventStream.listen((e) => {
-                              //       setState(() {
-                              //         final index =
-                              //             am.audioPlayer.currentIndex ?? 0;
-                              //         _playingTrack = am.audioPlayer.audioSource
-                              //             ?.sequence[index].tag;
-                              //       })
-                              //     });
-
-                              // am.audioPlayer.sequenceStateStream
-                              //     .listen((sequenceState) {
-                              //   if (sequenceState == null) return;
-                              //   final currentSource =
-                              //       sequenceState.currentSource;
-                              //
-                              //   SongModel sm =
-                              //       am.tracks[currentSource?.tag as int];
-                              //
-                              //   final currentTrack =
-                              //       // currentSource?.tag as SongModel;
-                              //       _playingTrack = sm;
-                              // });
-
-                              // if (am.audioPlayer.loopMode == LoopMode.all) {
-                              //   if (am.audioPlayer.playing) {
-                              //     setState(() {
-                              //       _playingTrack = pm.nextTrack;
-                              //
-                              //       // am.tracks[am.audioPlayer.currentIndex!];
-                              //     });
-                              //     // setState(() {});
-                              //   }
-                              // }
-                            },
+                            onPressed: () {},
                             icon: StreamBuilder<LoopMode>(
                                 stream: am.audioPlayer.loopModeStream,
                                 builder: (context, snapshot) {
                                   final loopMode = snapshot.data;
                                   if (loopMode == LoopMode.off) {
-                                    /// WORKING
-                                    // WidgetsBinding.instance
-                                    //     .addPostFrameCallback((_) {
-                                    //   setState(() {
-                                    //     _playingTrack = am.tracks[
-                                    //         am.audioPlayer.currentIndex!];
-                                    //   });
-                                    // });
-                                    // WidgetsBinding.instance
-                                    //     .addPostFrameCallback((_) {
-                                    //   setState(() {
-                                    //     _playingTrack =
-                                    //         am.tracks[_currentTrackIndex];
-                                    //   });
-                                    // });
-
-                                    // am.audioPlayer.sequenceStateStream
-                                    //     .listen((sequenceState) {
-                                    //   if (sequenceState == null) return;
-                                    //   final currentSource =
-                                    //       sequenceState.currentSource;
-                                    //
-                                    //   SongModel sm =
-                                    //       am.tracks[currentSource?.tag as int];
-                                    //   // final currentTrack =
-                                    //   // currentSource?.tag as SongModel;
-                                    //   _playingTrack = sm;
-                                    // });
-
-                                    // am.audioPlayer.playerStateStream
-                                    //     .listen((event) {
-                                    //   if (event.processingState ==
-                                    //       ProcessingState.completed) {
-                                    //     // TODO: Something to be done here, this is reachable
-                                    //     if (kDebugMode) {
-                                    //       print(
-                                    //           '=========================================');
-                                    //     }
-                                    //   }
-                                    // });
-
                                     return const Icon(
                                         Icons.disabled_by_default_outlined);
                                   } else if (loopMode == LoopMode.all) {
-                                    // TODO: This is next part to be done today in shaa Allah
-                                    // no problem here
-                                    _concatenating();
-                                    // am.audioPlayer.playerStateStream
-                                    //     .listen((event) {
-                                    //   if (event.processingState ==
-                                    //       ProcessingState.completed) {
-                                    //     // TODO: Something to be done here, this is reachable
-                                    //     if (kDebugMode) {
-                                    //       print(
-                                    //           '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
-                                    //     }
-                                    //   }
-                                    // });
                                     return const Icon(Icons.repeat);
                                   } else {
-                                    /// WORKING
                                     return const Icon(Icons.repeat_one);
                                   }
                                 }),
@@ -286,7 +185,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                 icon: !am.audioPlayer.playing
                                     ? const Icon(
                                         Icons.play_circle,
-                                        // opticalSize: 150,
                                       )
                                     : const Icon(Icons.pause_circle),
                                 iconSize: 80,
