@@ -9,7 +9,7 @@ import '../utils/sample_data.dart';
 import '../widgets/collapsed_recording_tile.dart';
 import '../widgets/empty_container.dart';
 import '../widgets/expanded_recording_tile.dart';
-import 'library_screen.dart';
+import 'track_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
           bottom: const TabBar(
             tabs: [
               Tab(
-                text: 'Library',
+                text: 'Tracks',
               ),
               Tab(
                 text: 'Directory',
@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: TabBarView(
             children: [
-              const LibraryScreen(),
+              const TrackScreen(),
               SingleChildScrollView(
                 physics: const BouncingScrollPhysics(
                   parent: AlwaysScrollableScrollPhysics(),

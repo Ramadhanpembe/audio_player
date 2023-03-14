@@ -1,69 +1,41 @@
+import 'package:audio_player/logics/track_manager.dart' as tm;
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:on_audio_query/on_audio_query.dart';
-import 'package:rxdart/rxdart.dart';
+
+import '../logics/audio_data_models.dart' as am;
+import '../logics/player_manager.dart' as pm;
+import '../models/duration_streams.dart';
 
 class PlayerScreen extends StatefulWidget {
-  final SongModel song;
-  final AudioPlayer audioPlayer;
-  final List<SongModel> songs;
-  const PlayerScreen({
-    super.key,
-    required this.song,
-    required this.audioPlayer,
-    required this.songs,
-  });
-
+  const PlayerScreen({super.key, required this.trackIndex});
+  final int trackIndex;
   @override
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  late final AudioPlayer _audioPlayer = widget.audioPlayer;
-  late final SongModel _song = widget.song;
-  late final List<SongModel> _songs = widget.songs;
-  // player position and current playing song duration state stream
-  Stream<DurationStreams> get _durationStreams {
-    return Rx.combineLatest3<Duration, Duration?, Duration?, DurationStreams>(
-        _audioPlayer.positionStream,
-        _audioPlayer.durationStream,
-        _audioPlayer.bufferedPositionStream, (position, duration, buffer) {
-      return DurationStreams(
-          position: position,
-          duration: duration ?? Duration.zero,
-          buffer: buffer ?? Duration.zero);
-    });
-  }
+  late final int _currentTrackIndex = widget.trackIndex;
+  late SongModel _playingTrack = am.tracks[_currentTrackIndex];
 
-  void checkLoopMode(AudioPlayer audioPlayer) {
-    final loopMode = audioPlayer.loopMode;
-    final shuffle = audioPlayer.shuffleModeEnabled;
-
-    if (loopMode == LoopMode.all && !shuffle) {
-      audioPlayer.setLoopMode(LoopMode.one);
-    } else if (loopMode == LoopMode.one && !shuffle) {
-      audioPlayer.setLoopMode(LoopMode.all);
-      audioPlayer.setShuffleModeEnabled(true);
-    } else {
-      audioPlayer.setLoopMode(LoopMode.all);
-      audioPlayer.setShuffleModeEnabled(false);
-    }
+  _concatenating() async {
+    await tm.setConcatenatingAudioSource(am.tracks.indexOf(_playingTrack));
   }
 
   @override
   void initState() {
-    _audioPlayer.setLoopMode(LoopMode.off);
-    _audioPlayer.setShuffleModeEnabled(false);
     super.initState();
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    String trackTitle =
-        _songs[_audioPlayer.nextIndex!].title.replaceRange(3, null, '');
-    String trackAlbum = _songs[_audioPlayer.nextIndex!].album!;
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 100.0,
@@ -72,11 +44,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              trackTitle,
+              _playingTrack.displayName,
               style: const TextStyle(fontSize: 24, letterSpacing: 2),
             ),
             Text(
-              trackAlbum,
+              _playingTrack.title,
               style: const TextStyle(fontSize: 16, letterSpacing: 2),
             ),
           ],
@@ -99,10 +71,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
                     color: Colors.teal,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  // child: Image.asset('images/call_recorder_logo.png'),
                   child: QueryArtworkWidget(
-                    id: _song.id,
+                    id: _playingTrack.id,
                     type: ArtworkType.AUDIO,
+                    keepOldArtwork: true,
                     artworkQuality: FilterQuality.high,
                     artworkBorder: BorderRadius.circular(12),
                     nullArtworkWidget: Image.asset(
@@ -136,7 +108,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             child: Container(
                               color: Colors.transparent,
                               child: StreamBuilder<DurationStreams>(
-                                stream: _durationStreams,
+                                stream: pm.durationStreams,
                                 builder: (context, snapshot) {
                                   final durationStates = snapshot.data;
                                   final progress =
@@ -152,11 +124,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                       progress: progress,
                                       total: duration,
                                       buffered: buffered,
-                                      barHeight: 3,
+                                      barHeight: 3.0,
                                       thumbRadius: 7.0,
                                       thumbColor: Colors.indigo,
                                       thumbGlowColor: Colors.white70,
-                                      thumbGlowRadius: 30,
+                                      thumbGlowRadius: 30.0,
                                       bufferedBarColor:
                                           Colors.indigoAccent.shade200,
                                       progressBarColor: Colors.indigo,
@@ -168,7 +140,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                       thumbCanPaintOutsideBar: true,
                                       timeLabelPadding: 5.0,
                                       onSeek: (duration) {
-                                        _audioPlayer.seek(duration);
+                                        am.audioPlayer.seek(duration);
                                       },
                                     ),
                                   );
@@ -184,42 +156,120 @@ class _PlayerScreenState extends State<PlayerScreen> {
                         children: [
                           IconButton(
                             onPressed: () {
-                              checkLoopMode(_audioPlayer);
+                              pm.checkLoopMode();
+
+                              // am.audioPlayer.playbackEventStream.listen((e) => {
+                              //       setState(() {
+                              //         final index =
+                              //             am.audioPlayer.currentIndex ?? 0;
+                              //         _playingTrack = am.audioPlayer.audioSource
+                              //             ?.sequence[index].tag;
+                              //       })
+                              //     });
+
+                              // am.audioPlayer.sequenceStateStream
+                              //     .listen((sequenceState) {
+                              //   if (sequenceState == null) return;
+                              //   final currentSource =
+                              //       sequenceState.currentSource;
+                              //
+                              //   SongModel sm =
+                              //       am.tracks[currentSource?.tag as int];
+                              //
+                              //   final currentTrack =
+                              //       // currentSource?.tag as SongModel;
+                              //       _playingTrack = sm;
+                              // });
+
+                              // if (am.audioPlayer.loopMode == LoopMode.all) {
+                              //   if (am.audioPlayer.playing) {
+                              //     setState(() {
+                              //       _playingTrack = pm.nextTrack;
+                              //
+                              //       // am.tracks[am.audioPlayer.currentIndex!];
+                              //     });
+                              //     // setState(() {});
+                              //   }
+                              // }
                             },
                             icon: StreamBuilder<LoopMode>(
-                                stream: _audioPlayer.loopModeStream,
+                                stream: am.audioPlayer.loopModeStream,
                                 builder: (context, snapshot) {
-                                  WidgetsBinding.instance
-                                      .addPostFrameCallback((_) {
-                                    setState(() {
-                                      trackTitle;
-                                      trackAlbum;
-                                    });
-                                  });
                                   final loopMode = snapshot.data;
-                                  final shuffle =
-                                      _audioPlayer.shuffleModeEnabled;
-                                  if (loopMode == LoopMode.all && !shuffle) {
-                                    _audioPlayer.seekToNext();
+                                  if (loopMode == LoopMode.off) {
+                                    /// WORKING
+                                    // WidgetsBinding.instance
+                                    //     .addPostFrameCallback((_) {
+                                    //   setState(() {
+                                    //     _playingTrack = am.tracks[
+                                    //         am.audioPlayer.currentIndex!];
+                                    //   });
+                                    // });
+                                    // WidgetsBinding.instance
+                                    //     .addPostFrameCallback((_) {
+                                    //   setState(() {
+                                    //     _playingTrack =
+                                    //         am.tracks[_currentTrackIndex];
+                                    //   });
+                                    // });
+
+                                    // am.audioPlayer.sequenceStateStream
+                                    //     .listen((sequenceState) {
+                                    //   if (sequenceState == null) return;
+                                    //   final currentSource =
+                                    //       sequenceState.currentSource;
+                                    //
+                                    //   SongModel sm =
+                                    //       am.tracks[currentSource?.tag as int];
+                                    //   // final currentTrack =
+                                    //   // currentSource?.tag as SongModel;
+                                    //   _playingTrack = sm;
+                                    // });
+
+                                    // am.audioPlayer.playerStateStream
+                                    //     .listen((event) {
+                                    //   if (event.processingState ==
+                                    //       ProcessingState.completed) {
+                                    //     // TODO: Something to be done here, this is reachable
+                                    //     if (kDebugMode) {
+                                    //       print(
+                                    //           '=========================================');
+                                    //     }
+                                    //   }
+                                    // });
+
+                                    return const Icon(
+                                        Icons.disabled_by_default_outlined);
+                                  } else if (loopMode == LoopMode.all) {
+                                    // TODO: This is next part to be done today in shaa Allah
+                                    // no problem here
+                                    _concatenating();
+                                    // am.audioPlayer.playerStateStream
+                                    //     .listen((event) {
+                                    //   if (event.processingState ==
+                                    //       ProcessingState.completed) {
+                                    //     // TODO: Something to be done here, this is reachable
+                                    //     if (kDebugMode) {
+                                    //       print(
+                                    //           '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+                                    //     }
+                                    //   }
+                                    // });
                                     return const Icon(Icons.repeat);
-                                  } else if (loopMode == LoopMode.one &&
-                                      !shuffle) {
-                                    return const Icon(Icons.repeat_one);
                                   } else {
-                                    _audioPlayer.shuffle();
-                                    return const Icon(Icons.shuffle);
+                                    /// WORKING
+                                    return const Icon(Icons.repeat_one);
                                   }
                                 }),
                             iconSize: 30,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            // crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               IconButton(
                                 onPressed: () {
-                                  if (_audioPlayer.hasPrevious) {
-                                    _audioPlayer.seekToPrevious();
+                                  if (am.audioPlayer.hasPrevious) {
+                                    am.audioPlayer.seekToPrevious();
                                   }
                                 },
                                 icon:
@@ -227,13 +277,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               ),
                               IconButton(
                                 onPressed: () {
-                                  if (_audioPlayer.playing) {
-                                    _audioPlayer.stop();
+                                  if (am.audioPlayer.playing) {
+                                    am.audioPlayer.stop();
                                   } else {
-                                    _audioPlayer.play();
+                                    am.audioPlayer.play();
                                   }
                                 },
-                                icon: !_audioPlayer.playing
+                                icon: !am.audioPlayer.playing
                                     ? const Icon(
                                         Icons.play_circle,
                                         // opticalSize: 150,
@@ -243,8 +293,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               ),
                               IconButton(
                                 onPressed: () {
-                                  if (_audioPlayer.hasNext) {
-                                    _audioPlayer.seekToNext();
+                                  if (am.audioPlayer.hasNext) {
+                                    am.audioPlayer.seekToNext();
                                   }
                                 },
                                 icon:
@@ -269,13 +319,4 @@ class _PlayerScreenState extends State<PlayerScreen> {
       ),
     );
   }
-}
-
-// position and duration state class
-class DurationStreams {
-  DurationStreams(
-      {this.position = Duration.zero,
-      this.duration = Duration.zero,
-      this.buffer = Duration.zero});
-  Duration position, duration, buffer;
 }
