@@ -47,7 +47,7 @@ android {
         applicationId "com.ramadhanpembe.audio_player"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 19
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -61,6 +61,22 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    // Add myself to solve some API deprecations problems
+    packagingOptions {
+        // Exclude file to avoid
+        // Error: Duplicate files during packaging of APK
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'META-INF/*.kotlin_module'
+    }
+    // up to here
 }
 
 flutter {

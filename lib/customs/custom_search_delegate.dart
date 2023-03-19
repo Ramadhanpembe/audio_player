@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../models/call_info.dart';
-import '../utils/sample_data.dart';
-import '../widgets/collapsed_recording_tile.dart';
-import '../widgets/expanded_recording_tile.dart';
-
 class CustomSearchDelegate extends SearchDelegate {
-  final List<CallInfo> _list = list;
+  final List<String> _list = ['Ramadhan', 'Khamis', 'Kassim', 'Amour'];
 
   @override
   String get searchFieldLabel => 'Search...';
@@ -46,10 +41,10 @@ class CustomSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    List<CallInfo> results = [];
-    for (var call in _list) {
-      if (call.caller!.toLowerCase().contains(query.toLowerCase())) {
-        results.add(call);
+    List<String> results = [];
+    for (var name in _list) {
+      if (name.toLowerCase().contains(query.toLowerCase())) {
+        results.add(name);
       }
     }
     return ListView.builder(
@@ -58,50 +53,17 @@ class CustomSearchDelegate extends SearchDelegate {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
-        return ExpansionPanelList(
-          dividerColor: Colors.transparent,
-          expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 0),
-          elevation: 0.0,
-          expansionCallback: (indexNo, isOpen) {
-            /// Equates the the ScrollView recording index to the PanelList index.
-            /// Sets the state of the recording tile to opposite of its current state when it is clicked.
-            indexNo = index;
-            _list[indexNo].isExpanded = !isOpen;
-          },
-          children: [
-            ExpansionPanel(
-              hasIcon: false,
-              canTapOnHeader: true,
-              isExpanded: _list[index].isExpanded,
-              headerBuilder: (context, isExpanded) {
-                return CollapsedRecordingTile(
-                  isClicked: false,
-                  isExpanded: results[index].isExpanded,
-                  phone: results[index].phone,
-                  caller: results[index].caller,
-                  duration: results[index].duration,
-                  datetime: results[index].datetime,
-                );
-              },
-              body: ExpandedRecordingTile(
-                isExpanded: results[index].isExpanded,
-                sliderValue: 2,
-                timeElapsed: '1:05',
-                timeRemained: '-8:15',
-              ),
-            ),
-          ],
-        );
+        return Text('Name $index');
       },
     );
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    List<CallInfo> results = [];
-    for (var call in _list) {
-      if (call.caller!.toLowerCase().contains(query.toLowerCase())) {
-        results.add(call);
+    List<String> results = [];
+    for (var name in _list) {
+      if (name.toLowerCase().contains(query.toLowerCase())) {
+        results.add(name);
       }
     }
     return ListView.builder(
@@ -110,40 +72,7 @@ class CustomSearchDelegate extends SearchDelegate {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
-        return ExpansionPanelList(
-          dividerColor: Colors.transparent,
-          expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 0),
-          elevation: 0.0,
-          expansionCallback: (indexNo, isOpen) {
-            /// Equates the the ScrollView recording index to the PanelList index.
-            /// Sets the state of the recording tile to opposite of its current state when it is clicked.
-            indexNo = index;
-            _list[indexNo].isExpanded = !isOpen;
-          },
-          children: [
-            ExpansionPanel(
-              hasIcon: false,
-              canTapOnHeader: true,
-              isExpanded: _list[index].isExpanded,
-              headerBuilder: (context, isExpanded) {
-                return CollapsedRecordingTile(
-                  isClicked: false,
-                  isExpanded: results[index].isExpanded,
-                  phone: results[index].phone,
-                  caller: results[index].caller,
-                  duration: results[index].duration,
-                  datetime: results[index].datetime,
-                );
-              },
-              body: ExpandedRecordingTile(
-                isExpanded: results[index].isExpanded,
-                sliderValue: 2,
-                timeElapsed: '1:05',
-                timeRemained: '-8:15',
-              ),
-            ),
-          ],
-        );
+        return Text('Name $index');
       },
     );
   }

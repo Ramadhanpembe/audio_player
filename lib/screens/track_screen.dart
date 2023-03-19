@@ -1,8 +1,9 @@
+import 'package:audio_player/main.dart';
+import 'package:audio_player/screens/player_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
-import '../logics/audio_data_models.dart' as am;
-import '../logics/track_manager.dart' as tm;
+import '../logics/player_query_resources.dart';
 
 class TrackScreen extends StatefulWidget {
   const TrackScreen({Key? key}) : super(key: key);
@@ -14,20 +15,18 @@ class TrackScreen extends StatefulWidget {
 class _TrackScreenState extends State<TrackScreen> {
   @override
   void initState() {
-    tm.requestPermission();
     super.initState();
   }
 
   @override
   void dispose() {
-    am.audioPlayer.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<SongModel>>(
-      future: am.audioQuery.querySongs(
+      future: audioQuery.querySongs(
         sortType: SongSortType.DISPLAY_NAME,
         orderType: OrderType.DESC_OR_GREATER,
         uriType: UriType.EXTERNAL,
@@ -35,10 +34,12 @@ class _TrackScreenState extends State<TrackScreen> {
       ),
       builder: (context, snapshot) {
         if (snapshot.data == null) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: Colors.indigo,
-              value: 5,
+          return Center(
+            child: Container(
+              margin: const EdgeInsets.all(8.0),
+              width: 32.0,
+              height: 32.0,
+              child: const CircularProgressIndicator(color: Colors.indigo),
             ),
           );
         } else if (snapshot.data!.isEmpty) {
@@ -46,9 +47,10 @@ class _TrackScreenState extends State<TrackScreen> {
             child: Text('No Audio Found'),
           );
         }
-        am.tracks = snapshot.data!;
+        tracks = snapshot.data!;
+        entities = queryManager.songToEntityAdapter(tracks);
         return ListView.builder(
-          itemCount: am.tracks.length,
+          itemCount: tracks.length,
           itemBuilder: (context, index) {
             return ListTile(
               leading: CircleAvatar(
@@ -60,17 +62,22 @@ class _TrackScreenState extends State<TrackScreen> {
                   nullArtworkWidget: Image.asset(
                     'images/musical_notes.png',
                     filterQuality: FilterQuality.high,
-                    fit: BoxFit.fill,
+                    fit: BoxFit.contain,
                     color: Colors.white,
                   ),
                 ),
               ),
-              title: Text(am.tracks.elementAt(index).displayName),
-              subtitle: Text(am.tracks.elementAt(index).title),
-              trailing: Text(am.tracks.elementAt(index).dateAdded.toString()),
+              title: Text(tracks.elementAt(index).displayName),
+              subtitle: Text(tracks.elementAt(index).title),
+              trailing: Text(tracks.elementAt(index).dateAdded.toString()),
               onTap: () {
-                tm.onTrackTap(context, index);
-                setState(() {});
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const PlayerScreen()));
+                // pageManager.audioSource(index);
+                playerManager.setInitialPlaylist(index);
+                playerManager.play();
+
+                // setState(() {});
               },
             );
           },

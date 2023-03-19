@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../widgets/setting_list_tile.dart';
-
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
@@ -27,7 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Container(
           padding: const EdgeInsets.all(8.0),
           child: const Center(
-            child: SettingListTile(),
+            child: Text(''),
           ),
         ),
       ),
