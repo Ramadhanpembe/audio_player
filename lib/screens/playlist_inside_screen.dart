@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:audio_player/logics/player_query_resources.dart';
 import 'package:audio_player/main.dart';
 import 'package:audio_player/screens/add_to_playlist_screen.dart';
@@ -8,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:on_audio_room/on_audio_room.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_extend/share_extend.dart';
 
 class PlaylistInsideScreen extends StatefulWidget {
   const PlaylistInsideScreen({super.key, required this.playlistIndex});
@@ -21,6 +17,97 @@ class PlaylistInsideScreen extends StatefulWidget {
 
 class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
   late final _playlistIndex = widget.playlistIndex;
+  final TextEditingController controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 100.0,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
+        ),
+        title: Text(playlists[_playlistIndex].playlistName),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_outlined),
+            onPressed: () async {
+              final bl = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => AddToPlaylistScreen(
+                            playlistIndex: _playlistIndex,
+                          )));
+
+              if (bl) {
+                setState(() {});
+              }
+            },
+            iconSize: 30.0,
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {},
+            iconSize: 30.0,
+          ),
+          _buildPopupMenuButton(context),
+        ],
+      ),
+      body: SafeArea(
+        child: Center(
+          child: FutureBuilder<List<SongEntity>>(
+            future: _allFromPlaylist,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return _buildProgressIndicator(message: 'Loading...');
+              }
+              if (snapshot.hasError) {
+                return _buildErrorIndicator(
+                    message: 'Error in fetching the list!!');
+              }
+              if (snapshot.hasData) {
+                addedEntities = snapshot.data!;
+                addedTracks = queryManager.entityToSongAdapter(addedEntities);
+
+                return ListView.builder(
+                  itemCount: addedTracks.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      leading: _buildCircleAvatar(index),
+                      title: Text(addedTracks[index].displayName),
+                      subtitle: Text(addedTracks[index].title),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.more_horiz),
+                        onPressed: () async {
+                          _showModalBottomSheet(index, addedTracks[index]);
+                        },
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const PlayerScreen()));
+                        playerManager.setPlaylist(index, addedTracks);
+                        playerManager.play();
+                      },
+                    );
+                  },
+                );
+              }
+              return _buildEmptyIndicator(message: 'No track found!');
+            },
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<List<SongEntity>> get _allFromPlaylist async {
     setState(() {});
@@ -50,20 +137,6 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
     return '${formatDuration(duration.inHours)}:$minutes:$seconds';
   }
 
-  void _share(String filename) async {
-    Directory dir = await getApplicationDocumentsDirectory();
-    File testFile = File("${dir.path}/$filename");
-    if (!await testFile.exists()) {
-      await testFile.create(recursive: true);
-      testFile.writeAsStringSync("test for share documents file");
-    }
-    ShareExtend.share(testFile.path, "file");
-  }
-
-  // Future<String?> _getPath(SongModel track) async {
-  //   return await LecleFlutterAbsolutePath.getAbsolutePath(uri: track.uri ?? '');
-  // }
-
   void _showModalBottomSheet(int index, SongModel track) {
     showModalBottomSheet(
         isScrollControlled: true,
@@ -76,10 +149,24 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
               children: [
                 Column(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.favorite_border),
-                      onPressed: () {},
-                      iconSize: 40.0,
+                    ValueListenableBuilder(
+                      valueListenable: queryManager.isFavoriteNotifier,
+                      builder: (_, isFavorite, __) {
+                        return IconButton(
+                          icon: isFavorite
+                              ? const Icon(Icons.favorite)
+                              : const Icon(Icons.favorite_border),
+                          onPressed: () async {
+                            queryManager.addToFavorite(
+                                track.getMap.toFavoritesEntity());
+                            favoritesEntities = queryManager.initFavorites;
+                            // _isFavorite(favoritesEntities);
+                            /// favorites here
+                            setState(() {});
+                          },
+                          iconSize: 40.0,
+                        );
+                      },
                     ),
                     const Text('Favorite'),
                   ],
@@ -98,26 +185,6 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                       iconSize: 40.0,
                     ),
                     const Text('Remove'),
-                  ],
-                ),
-                Column(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.share),
-                      onPressed: () async {
-                        /// /////////////////////////////////////////
-                        // String? path = await LecleFlutterAbsolutePath.getAbsolutePath(
-                        //     uri: track.uri ?? '');
-                        // await Share.shareXFiles([XFile(path ?? '')]);
-                        if (mounted) Navigator.pop(context);
-                        _share(track.displayName);
-                        // Share.share(
-                        //   track.displayName,
-                        // );
-                      },
-                      iconSize: 40.0,
-                    ),
-                    const Text('Share'),
                   ],
                 ),
                 Column(
@@ -186,10 +253,6 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                                                 track.dateModified ?? 0)
                                             .toString()),
                                       ),
-                                      const ListTile(
-                                        leading: Text('Path:'),
-                                        title: Text('Path'),
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -207,106 +270,117 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
         });
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void _isFavorite(List<FavoritesEntity> favorites) {
+    for (FavoritesEntity favorite in favorites) {
+      queryManager.isFavorite(favorite);
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 100.0,
-        title: Text(playlists[_playlistIndex].playlistName),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_box_outlined),
-            onPressed: () async {
-              final bl = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => AddToPlaylistScreen(
-                            playlistIndex: _playlistIndex,
-                          )));
-
-              if (bl) {
-                setState(() {});
-              }
-            },
-            iconSize: 30.0,
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-            iconSize: 30.0,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: FutureBuilder<List<SongEntity>>(
-            future: _allFromPlaylist,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(
-                  child: Text('Loading...'),
-                );
-              }
-              if (snapshot.hasError) {
-                return const Text('Error in fetching the list!!');
-              }
-              if (snapshot.hasData) {
-                addedEntities = snapshot.data!;
-                addedTracks = queryManager.entityToSongAdapter(addedEntities);
-
-                return ListView.builder(
-                  itemCount: addedTracks.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.indigo,
-                        radius: 30.0,
-                        child: QueryArtworkWidget(
-                          id: addedTracks[index].id,
-                          type: ArtworkType.AUDIO,
-                          keepOldArtwork: true,
-                          nullArtworkWidget: Image.asset(
-                            'images/musical_notes.png',
-                            filterQuality: FilterQuality.high,
-                            fit: BoxFit.fill,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      title: Text(addedTracks[index].displayName),
-                      subtitle: Text(addedTracks[index].title),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.more_horiz),
-                        onPressed: () async {
-                          // we need to show something like bottom sheet
-                          // String? path = await _getPath(addedTracks[index]);
-                          _showModalBottomSheet(index, addedTracks[index]);
-                        },
-                      ),
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const PlayerScreen()));
-                        // pageManager.audioSource(index);
-                        /// this is where the real challenge is - SOLVED:
-                        playerManager.setPlaylist(index, addedTracks);
-                        playerManager.play();
-                      },
-                    );
-                  },
-                );
-              }
-              return const Center(
-                child: Text('No track found!'),
-              );
-            },
-          ),
+  CircleAvatar _buildCircleAvatar(int index) {
+    return CircleAvatar(
+      backgroundColor: Colors.indigo,
+      radius: 30.0,
+      child: QueryArtworkWidget(
+        id: addedTracks[index].id,
+        type: ArtworkType.AUDIO,
+        keepOldArtwork: true,
+        nullArtworkWidget: Image.asset(
+          'images/musical_notes.png',
+          filterQuality: FilterQuality.high,
+          fit: BoxFit.fill,
+          color: Colors.white,
         ),
       ),
+    );
+  }
+
+  Center _buildEmptyIndicator({required String message}) {
+    return Center(
+      child: Text(message),
+    );
+  }
+
+  Text _buildErrorIndicator({required String message}) => Text(message);
+
+  Center _buildProgressIndicator({required String message}) {
+    return Center(
+      child: Text(message),
+    );
+  }
+
+  PopupMenuButton<dynamic> _buildPopupMenuButton(BuildContext context) {
+    return PopupMenuButton(
+      icon: const Icon(Icons.more_vert),
+      iconSize: 30.0,
+      onSelected: (value) async {
+        if (value == 'Rename playlist') {
+          await showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Rename Playlist'),
+                content: TextField(
+                  controller: controller,
+                  keyboardType: TextInputType.text,
+                  autocorrect: false,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Okay'),
+                  ),
+                ],
+              );
+            },
+          );
+          queryManager.renamePlaylist(
+              playlists[_playlistIndex].key, controller.text);
+          playlistEntities = queryManager.initPlaylists;
+          setState(() {});
+        }
+        if (value == 'Clear all') {
+          List<SongEntity> ens = await queryManager
+              .getAllFromPlaylist(playlists[_playlistIndex].key);
+          queryManager.removeAllFromPlaylist(
+              ens, playlists[_playlistIndex].key);
+          setState(() {});
+        }
+        if (value == 'Delete playlist') {
+          // if (mounted) Navigator.pop(context, true);
+          /// Pending feature - its not working as expected
+          if (mounted) Navigator.pop(context, true);
+          queryManager.deletePlaylist(playlists[_playlistIndex].key);
+          setState(() {});
+        }
+      },
+      itemBuilder: (context) {
+        return <PopupMenuEntry>[
+          const PopupMenuItem(
+            value: 'Rename playlist',
+            child: Text('Rename playlist'),
+          ),
+          const PopupMenuItem(
+            value: 'Clear all',
+            child: Text('Clear all'),
+          ),
+          const PopupMenuItem(
+            value: 'Sort items',
+            child: Text('Sort items'),
+          ),
+          const PopupMenuItem(
+            value: 'Delete playlist',
+            child: Text('Delete playlist'),
+          ),
+        ];
+      },
     );
   }
 }

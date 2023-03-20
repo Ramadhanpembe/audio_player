@@ -118,26 +118,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               valueListenable:
                                   playerManager.progressBarNotifier,
                               builder: (_, value, __) {
-                                return ProgressBar(
-                                  progress: value.current,
-                                  total: value.total,
-                                  buffered: value.buffered,
-                                  barHeight: 3.0,
-                                  thumbRadius: 7.0,
-                                  barCapShape: BarCapShape.square,
-                                  thumbColor: Colors.indigo,
-                                  thumbGlowColor: Colors.white70,
-                                  thumbGlowRadius: 30.0,
-                                  bufferedBarColor:
-                                      Colors.indigoAccent.shade200,
-                                  progressBarColor: Colors.indigo,
-                                  baseBarColor: Colors.indigo.shade300,
-                                  timeLabelLocation: TimeLabelLocation.below,
-                                  timeLabelType: TimeLabelType.remainingTime,
-                                  thumbCanPaintOutsideBar: true,
-                                  timeLabelPadding: 5.0,
-                                  onSeek: playerManager.seek,
-                                );
+                                return _buildProgressBar(value);
                               },
                             ),
                           ),
@@ -278,6 +259,26 @@ class _PlayerScreenState extends State<PlayerScreen> {
       ),
     );
   }
-}
 
-// checking if the created branch is working fine
+  ProgressBar _buildProgressBar(ProgressBarState value) {
+    return ProgressBar(
+      progress: value.current,
+      total: value.total,
+      buffered: value.buffered,
+      barHeight: 3.0,
+      thumbRadius: 7.0,
+      barCapShape: BarCapShape.square,
+      thumbColor: Colors.indigo,
+      thumbGlowColor: Colors.white70,
+      thumbGlowRadius: 30.0,
+      bufferedBarColor: Colors.indigoAccent.shade200,
+      progressBarColor: Colors.indigo,
+      baseBarColor: Colors.indigo.shade300,
+      timeLabelLocation: TimeLabelLocation.below,
+      timeLabelType: TimeLabelType.remainingTime,
+      thumbCanPaintOutsideBar: true,
+      timeLabelPadding: 5.0,
+      onSeek: playerManager.seek,
+    );
+  }
+}

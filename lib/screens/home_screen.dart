@@ -1,7 +1,7 @@
+import 'package:audio_player/screens/favorite_screen.dart';
 import 'package:audio_player/screens/playlist_screen.dart';
-import 'package:audio_player/screens/settings_screen.dart';
+import 'package:audio_player/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../customs/custom_search_delegate.dart';
 import 'track_screen.dart';
@@ -29,26 +29,9 @@ class _HomeScreenState extends State<HomeScreen> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          systemOverlayStyle: const SystemUiOverlayStyle(
-            statusBarColor: Colors.indigo,
-            statusBarBrightness: Brightness.light,
-            statusBarIconBrightness: Brightness.light,
-            systemNavigationBarIconBrightness: Brightness.light,
-          ),
+          systemOverlayStyle: kSystemUiOverlayStyle,
           title: const Text('Audio Player'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(
-                text: 'Tracks',
-              ),
-              Tab(
-                text: 'Playlists',
-              ),
-              Tab(
-                text: 'Favorite',
-              ),
-            ],
-          ),
+          bottom: _buildTabBar(),
           actions: [
             IconButton(
               icon: const Icon(Icons.search),
@@ -59,36 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
-            PopupMenuButton(
-              padding: const EdgeInsets.all(8),
-              icon: const Icon(Icons.more_vert),
-              onSelected: (value) {
-                if (value == 'settings') {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const SettingsScreen(),
-                  ));
-                }
-              },
-              onOpened: () {},
-              itemBuilder: (context) {
-                return <PopupMenuEntry>[
-                  const PopupMenuItem(
-                    value: 'settings',
-                    child: Text('Settings'),
-                  ),
-                  const PopupMenuItem(
-                    // in this same field, if all are expanded, then it should change to Collapse All
-                    child: Text('Expand All'),
-                  ),
-                  const PopupMenuItem(
-                    child: Text('Delete Multiple'),
-                  ),
-                  const PopupMenuItem(
-                    child: Text('Delete All'),
-                  ),
-                ];
-              },
-            ),
+            _buildPopupMenuButton(),
           ],
         ),
         body: const SafeArea(
@@ -96,13 +50,54 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               TrackScreen(),
               PlaylistScreen(),
-              Center(
-                child: Text('This is Favorite screen'),
-              ),
+              FavoriteScreen(),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  PopupMenuButton<dynamic> _buildPopupMenuButton() {
+    return PopupMenuButton(
+      padding: const EdgeInsets.all(8),
+      icon: const Icon(Icons.more_vert),
+      onSelected: (value) {},
+      onOpened: () {},
+      itemBuilder: (context) {
+        return <PopupMenuEntry>[
+          const PopupMenuItem(
+            value: 'settings',
+            child: Text('Settings'),
+          ),
+          const PopupMenuItem(
+            // in this same field, if all are expanded, then it should change to Collapse All
+            child: Text('Expand All'),
+          ),
+          const PopupMenuItem(
+            child: Text('Delete Multiple'),
+          ),
+          const PopupMenuItem(
+            child: Text('Delete All'),
+          ),
+        ];
+      },
+    );
+  }
+
+  TabBar _buildTabBar() {
+    return const TabBar(
+      tabs: [
+        Tab(
+          text: 'Tracks',
+        ),
+        Tab(
+          text: 'Playlists',
+        ),
+        Tab(
+          text: 'Favorite',
+        ),
+      ],
     );
   }
 }

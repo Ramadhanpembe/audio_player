@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 const int kSplashColor = 0xffF2DDE6;
 const int kPrimaryColor = 0xff9F1D45;
@@ -62,4 +63,13 @@ const kTimeElapsedTitleStyle = TextStyle(
   fontSize: 14,
   fontWeight: FontWeight.bold,
   color: Color(0xff6E6E6E),
+);
+
+/// New Ones - Added Specifically for Audio Player
+
+const kSystemUiOverlayStyle = SystemUiOverlayStyle(
+  statusBarColor: Colors.indigo,
+  statusBarBrightness: Brightness.light,
+  statusBarIconBrightness: Brightness.light,
+  systemNavigationBarIconBrightness: Brightness.light,
 );

@@ -8,8 +8,29 @@ class QueryManager {
     _init();
   }
 
+  final isFavoriteNotifier = ValueNotifier<bool>(false);
+
+  void isFavorite(FavoritesEntity favorite) async {
+    bool isFavorite = await audioRoom.checkIn(RoomType.FAVORITES, favorite.id);
+    isFavoriteNotifier.value = isFavorite == true;
+  }
+
   Future<List<PlaylistEntity>> get initPlaylists async {
     return await audioRoom.queryPlaylists();
+  }
+
+  /// favorites
+  Future<List<FavoritesEntity>> get initFavorites async {
+    return await audioRoom.queryFavorites();
+  }
+
+  Future<List<SongModel>> get initSongs async {
+    return audioQuery.querySongs(
+      sortType: SongSortType.DISPLAY_NAME,
+      orderType: OrderType.DESC_OR_GREATER,
+      uriType: UriType.EXTERNAL,
+      ignoreCase: true,
+    );
   }
 
   Future<bool> isPreAdded(
@@ -26,7 +47,12 @@ class QueryManager {
     audioQuery = OnAudioQuery();
     audioRoom = OnAudioRoom();
     playlists = <PlaylistEntity>[];
+    favorites = <FavoritesEntity>[];
+    songModels = initSongs;
     playlistEntities = initPlaylists;
+
+    /// favorites
+    favoritesEntities = initFavorites;
     _requestPermission();
     tracks = <SongModel>[];
     entities = <SongEntity>[];
@@ -82,9 +108,36 @@ class QueryManager {
         playlistKey: playlistKey);
   }
 
-  // void deleteAllPlaylists() async {
-  //   await audioRoom.clearAll();
-  // }
+  // entityIds are the same as the modelIds
+  void removeAllFromPlaylist(List<SongEntity> entities, int playlistKey) async {
+    for (SongEntity entity in entities) {
+      removeFromPlaylist(entity.id, playlistKey);
+    }
+  }
+
+  void renamePlaylist(int playlistKey, String newName) async {
+    if (newName.trim().isEmpty) return;
+    audioRoom.renamePlaylist(playlistKey, newName);
+  }
+
+  void deletePlaylist(int playlistKey) async {
+    await audioRoom.deletePlaylist(playlistKey);
+  }
+
+  /// add to favorites
+  void addToFavorite(FavoritesEntity favorite) async {
+    await audioRoom.addTo(RoomType.FAVORITES, favorite);
+  }
+
+  /// change from favorites to song
+  List<SongModel> favoriteToSongAdapter(
+      List<FavoritesEntity> favoritesEntities) {
+    List<SongEntity> entities = [];
+    for (FavoritesEntity favorite in favoritesEntities) {
+      entities.add(favorite.getMap.toSongEntity());
+    }
+    return entityToSongAdapter(entities);
+  }
 
   void dispose() {
     audioRoom.closeRoom();

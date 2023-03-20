@@ -26,26 +26,12 @@ class _TrackScreenState extends State<TrackScreen> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<SongModel>>(
-      future: audioQuery.querySongs(
-        sortType: SongSortType.DISPLAY_NAME,
-        orderType: OrderType.DESC_OR_GREATER,
-        uriType: UriType.EXTERNAL,
-        ignoreCase: true,
-      ),
+      future: songModels,
       builder: (context, snapshot) {
         if (snapshot.data == null) {
-          return Center(
-            child: Container(
-              margin: const EdgeInsets.all(8.0),
-              width: 32.0,
-              height: 32.0,
-              child: const CircularProgressIndicator(color: Colors.indigo),
-            ),
-          );
+          return _buildProgressIndicator();
         } else if (snapshot.data!.isEmpty) {
-          return const Center(
-            child: Text('No Audio Found'),
-          );
+          return _buildEmptyIndicator(message: 'No Audio Found');
         }
         tracks = snapshot.data!;
         entities = queryManager.songToEntityAdapter(tracks);
@@ -53,27 +39,13 @@ class _TrackScreenState extends State<TrackScreen> {
           itemCount: tracks.length,
           itemBuilder: (context, index) {
             return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.indigo,
-                radius: 30.0,
-                child: QueryArtworkWidget(
-                  id: snapshot.data![index].id,
-                  type: ArtworkType.AUDIO,
-                  nullArtworkWidget: Image.asset(
-                    'images/musical_notes.png',
-                    filterQuality: FilterQuality.high,
-                    fit: BoxFit.contain,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              leading: _buildCircleAvatar(snapshot, index),
               title: Text(tracks.elementAt(index).displayName),
               subtitle: Text(tracks.elementAt(index).title),
               trailing: Text(tracks.elementAt(index).dateAdded.toString()),
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => const PlayerScreen()));
-                // pageManager.audioSource(index);
                 playerManager.setInitialPlaylist(index);
                 playerManager.play();
 
@@ -83,6 +55,41 @@ class _TrackScreenState extends State<TrackScreen> {
           },
         );
       },
+    );
+  }
+
+  Center _buildEmptyIndicator({required String message}) {
+    return Center(
+      child: Text(message),
+    );
+  }
+
+  Center _buildProgressIndicator() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(8.0),
+        width: 32.0,
+        height: 32.0,
+        child: const CircularProgressIndicator(color: Colors.indigo),
+      ),
+    );
+  }
+
+  CircleAvatar _buildCircleAvatar(
+      AsyncSnapshot<List<SongModel>> snapshot, int index) {
+    return CircleAvatar(
+      backgroundColor: Colors.indigo,
+      radius: 30.0,
+      child: QueryArtworkWidget(
+        id: snapshot.data![index].id,
+        type: ArtworkType.AUDIO,
+        nullArtworkWidget: Image.asset(
+          'images/musical_notes.png',
+          filterQuality: FilterQuality.high,
+          fit: BoxFit.contain,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 }

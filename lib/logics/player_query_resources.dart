@@ -24,4 +24,15 @@ late ConcatenatingAudioSource concatenatingAudioSource;
 // trying to create playlists
 late List<PlaylistEntity> playlists;
 
+/// favorites
+late List<FavoritesEntity> favorites;
+
+/// favorites
+late List<SongModel> addedFavorites;
+
 late Future<List<PlaylistEntity>> playlistEntities;
+
+/// favorites
+late Future<List<FavoritesEntity>> favoritesEntities;
+
+late Future<List<SongModel>> songModels;

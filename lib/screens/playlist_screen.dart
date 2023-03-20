@@ -87,19 +87,9 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
             future: playlistEntities,
             builder: (context, snapshot) {
               if (snapshot.data == null) {
-                return Center(
-                  child: Container(
-                    margin: const EdgeInsets.all(8.0),
-                    width: 32.0,
-                    height: 32.0,
-                    child:
-                        const CircularProgressIndicator(color: Colors.indigo),
-                  ),
-                );
+                return _buildProgressIndicator();
               } else if (snapshot.data!.isEmpty) {
-                return const Center(
-                  child: Text('No Playlist yet'),
-                );
+                return _buildEmptyIndicator(message: 'No Playlist yet');
               }
               playlists = snapshot.data!;
               return ListView.builder(
@@ -109,25 +99,22 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
-                      leading: QueryArtworkWidget(
-                        id: playlists[index].key,
-                        type: ArtworkType.PLAYLIST,
-                        nullArtworkWidget: const Icon(
-                          Icons.featured_play_list_outlined,
-                          size: 50.0,
-                          color: Colors.indigo,
-                        ),
-                      ),
+                      leading: _buildPlaylistDisplayIcon(index),
                       title: Text(playlists[index].playlistName),
                       trailing: IconButton(
                         icon: const Icon(Icons.more_horiz),
                         onPressed: () {},
                       ),
                       onTap: () async {
-                        if (mounted) {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) =>
-                                  PlaylistInsideScreen(playlistIndex: index)));
+                        final bool bl = await Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => PlaylistInsideScreen(
+                                    playlistIndex: index)));
+
+                        if (bl) {
+                          setState(() {
+                            // queryManager.initPlaylists;
+                          });
                         }
                       },
                     ),
@@ -138,6 +125,35 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  QueryArtworkWidget _buildPlaylistDisplayIcon(int index) {
+    return QueryArtworkWidget(
+      id: playlists[index].key,
+      type: ArtworkType.PLAYLIST,
+      nullArtworkWidget: const Icon(
+        Icons.featured_play_list_outlined,
+        size: 50.0,
+        color: Colors.indigo,
+      ),
+    );
+  }
+
+  Center _buildEmptyIndicator({required String message}) {
+    return Center(
+      child: Text(message),
+    );
+  }
+
+  Center _buildProgressIndicator() {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(8.0),
+        width: 32.0,
+        height: 32.0,
+        child: const CircularProgressIndicator(color: Colors.indigo),
+      ),
     );
   }
 }
