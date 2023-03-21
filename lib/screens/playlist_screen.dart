@@ -101,10 +101,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                     child: ListTile(
                       leading: _buildPlaylistDisplayIcon(index),
                       title: Text(playlists[index].playlistName),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.more_horiz),
-                        onPressed: () {},
-                      ),
                       onTap: () async {
                         final bool bl = await Navigator.of(context).push(
                             MaterialPageRoute(
@@ -115,6 +111,39 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                           setState(() {
                             // queryManager.initPlaylists;
                           });
+                        }
+                      },
+                      onLongPress: () async {
+                        bool isDeleted = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text(
+                                    'Delete playlist ${playlists[index].playlistName}?'),
+                                content: Text(
+                                    'Are you sure you want to delete ${playlists[index].playlistName}?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, false);
+                                    },
+                                    child: const Text('CANCEL'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      queryManager
+                                          .deletePlaylist(playlists[index].key);
+                                      setState(() {});
+                                      Navigator.pop(context, true);
+                                    },
+                                    child: const Text('YES'),
+                                  ),
+                                ],
+                              );
+                            });
+                        if (isDeleted) {
+                          playlistEntities = queryManager.initPlaylists;
+                          setState(() {});
                         }
                       },
                     ),

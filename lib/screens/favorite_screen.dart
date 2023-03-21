@@ -59,11 +59,11 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     );
   }
 
-  void _isFavorite(List<FavoritesEntity> favorites) {
-    for (FavoritesEntity favorite in favorites) {
-      queryManager.isFavorite(favorite);
-    }
-  }
+  // void _isFavorite(List<FavoritesEntity> favorites) {
+  //   for (FavoritesEntity favorite in favorites) {
+  //     queryManager.isFavorite(favorite);
+  //   }
+  // }
 
   String _dateFromTimestamp(int timestamp) {
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
@@ -128,25 +128,18 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           return SizedBox(
             height: MediaQuery.of(context).size.height * 0.1,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Column(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.favorite_border),
-                      onPressed: () {},
-                      iconSize: 40.0,
-                    ),
-                    const Text('Favorite'),
-                  ],
-                ),
                 Column(
                   children: [
                     IconButton(
                       icon: const Icon(Icons.delete_outline),
                       onPressed: () {
-                        setState(() {});
+                        /// remove from favorites here
+                        queryManager.removeFromFavorite(track);
                         Navigator.pop(context);
+                        setState(() {});
+                        favoritesEntities = queryManager.initFavorites;
                       },
                       iconSize: 40.0,
                     ),

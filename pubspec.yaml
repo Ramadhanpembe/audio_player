@@ -21,6 +21,7 @@ dependencies:
   audio_video_progress_bar: ^1.0.0
   on_audio_room: ^2.2.1+1
   intl: ^0.18.0
+  audio_service: ^0.18.9
 
 
 

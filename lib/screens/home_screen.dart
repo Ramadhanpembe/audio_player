@@ -42,7 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
-            _buildPopupMenuButton(),
+            IconButton(
+              icon: const Icon(Icons.dehaze_outlined),
+              onPressed: () {},
+            )
           ],
         ),
         body: const SafeArea(
@@ -58,44 +61,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  PopupMenuButton<dynamic> _buildPopupMenuButton() {
-    return PopupMenuButton(
-      padding: const EdgeInsets.all(8),
-      icon: const Icon(Icons.more_vert),
-      onSelected: (value) {},
-      onOpened: () {},
-      itemBuilder: (context) {
-        return <PopupMenuEntry>[
-          const PopupMenuItem(
-            value: 'settings',
-            child: Text('Settings'),
-          ),
-          const PopupMenuItem(
-            // in this same field, if all are expanded, then it should change to Collapse All
-            child: Text('Expand All'),
-          ),
-          const PopupMenuItem(
-            child: Text('Delete Multiple'),
-          ),
-          const PopupMenuItem(
-            child: Text('Delete All'),
-          ),
-        ];
-      },
-    );
-  }
-
   TabBar _buildTabBar() {
     return const TabBar(
       tabs: [
         Tab(
-          text: 'Tracks',
+          text: 'TRACKS',
         ),
         Tab(
-          text: 'Playlists',
+          text: 'PLAYLISTS',
         ),
         Tab(
-          text: 'Favorite',
+          text: 'FAVORITES',
         ),
       ],
     );

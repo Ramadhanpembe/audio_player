@@ -1,3 +1,4 @@
+import 'package:audio_player/logics/player_handler.dart';
 import 'package:audio_player/logics/query_manager.dart';
 import 'package:audio_player/screens/home_screen.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'logics/player_manager.dart';
 
 void main() async {
   await OnAudioRoom().initRoom();
+  await initAudioService();
   runApp(const MyApp());
 }
 

@@ -81,6 +81,8 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                 return ListView.builder(
                   itemCount: addedTracks.length,
                   itemBuilder: (context, index) {
+                    /// favorites
+                    // queryManager.testWithStreams(addedTracks);
                     return ListTile(
                       leading: _buildCircleAvatar(index),
                       title: Text(addedTracks[index].displayName),
@@ -88,7 +90,10 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                       trailing: IconButton(
                         icon: const Icon(Icons.more_horiz),
                         onPressed: () async {
-                          _showModalBottomSheet(index, addedTracks[index]);
+                          isFavorite =
+                              await queryManager.isFavorite(addedTracks[index]);
+                          _showModalBottomSheet(
+                              index, addedTracks[index], isFavorite);
                         },
                       ),
                       onTap: () {
@@ -137,143 +142,146 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
     return '${formatDuration(duration.inHours)}:$minutes:$seconds';
   }
 
-  void _showModalBottomSheet(int index, SongModel track) {
+  void _showModalBottomSheet(int index, SongModel track, bool isFavorite) {
     showModalBottomSheet(
         isScrollControlled: true,
         context: context,
         builder: (context) {
-          return SizedBox(
-            height: MediaQuery.of(context).size.height * 0.1,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
+          return StatefulBuilder(
+            builder: (context, void Function(void Function()) setModalState) {
+              return SizedBox(
+                height: MediaQuery.of(context).size.height * 0.1,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    ValueListenableBuilder(
-                      valueListenable: queryManager.isFavoriteNotifier,
-                      builder: (_, isFavorite, __) {
-                        return IconButton(
+                    Column(
+                      children: [
+                        IconButton(
                           icon: isFavorite
                               ? const Icon(Icons.favorite)
                               : const Icon(Icons.favorite_border),
                           onPressed: () async {
-                            queryManager.addToFavorite(
-                                track.getMap.toFavoritesEntity());
+                            if (isFavorite) {
+                              isFavorite = false;
+                              queryManager.removeFromFavorite(track);
+                              setModalState(() {});
+                            } else {
+                              isFavorite = true;
+                              queryManager.addToFavorite(
+                                  track.getMap.toFavoritesEntity());
+                              setModalState(() {});
+                            }
                             favoritesEntities = queryManager.initFavorites;
-                            // _isFavorite(favoritesEntities);
-                            /// favorites here
-                            setState(() {});
+                            setModalState(() {});
                           },
                           iconSize: 40.0,
-                        );
-                      },
+                        ),
+                        const Text('Favorite'),
+                      ],
                     ),
-                    const Text('Favorite'),
-                  ],
-                ),
-                Column(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () {
-                        setState(() {
-                          queryManager.removeFromPlaylist(addedTracks[index].id,
-                              playlists[_playlistIndex].key);
-                        });
-                        Navigator.pop(context);
-                      },
-                      iconSize: 40.0,
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () {
+                            setState(() {
+                              queryManager.removeFromPlaylist(
+                                  addedTracks[index].id,
+                                  playlists[_playlistIndex].key);
+                            });
+                            Navigator.pop(context);
+                          },
+                          iconSize: 40.0,
+                        ),
+                        const Text('Remove'),
+                      ],
                     ),
-                    const Text('Remove'),
-                  ],
-                ),
-                Column(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.info_outline),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: const Text('Track Details'),
-                                actions: [
-                                  TextButton(
-                                    child: const Text('Okay'),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ],
-                                content: SingleChildScrollView(
-                                  child: Column(
-                                    children: [
-                                      ListTile(
-                                        leading: const Text('Title:'),
-                                        title: Text(track.title),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Album:'),
-                                        title: Text(track.album ?? '<unknown>'),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Artist:'),
-                                        title:
-                                            Text(track.artist ?? '<unknown>'),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Genre:'),
-                                        title: Text(track.genre ?? '<unknown>'),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Size:'),
-                                        title: Text(
-                                            '${_megabytesFromBytes(track.size)} MB'),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Extension:'),
-                                        title: Text(
-                                            _trackExtension(track.displayName)),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Duration:'),
-                                        title: Text(_durationFormatter(
-                                            track.duration ?? 0)),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Date Added:'),
-                                        title: Text(_dateFromTimestamp(
-                                                track.dateAdded ?? 0)
-                                            .toString()),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Date Modified:'),
-                                        title: Text(_dateFromTimestamp(
-                                                track.dateModified ?? 0)
-                                            .toString()),
+                    Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.info_outline),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const Text('Track Details'),
+                                    actions: [
+                                      TextButton(
+                                        child: const Text('Okay'),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
                                       ),
                                     ],
-                                  ),
-                                ),
-                              );
-                            });
-                      },
-                      iconSize: 40.0,
+                                    content: SingleChildScrollView(
+                                      child: Column(
+                                        children: [
+                                          ListTile(
+                                            leading: const Text('Title:'),
+                                            title: Text(track.title),
+                                          ),
+                                          ListTile(
+                                            leading: const Text('Album:'),
+                                            title: Text(
+                                                track.album ?? '<unknown>'),
+                                          ),
+                                          ListTile(
+                                            leading: const Text('Artist:'),
+                                            title: Text(
+                                                track.artist ?? '<unknown>'),
+                                          ),
+                                          ListTile(
+                                            leading: const Text('Genre:'),
+                                            title: Text(
+                                                track.genre ?? '<unknown>'),
+                                          ),
+                                          ListTile(
+                                            leading: const Text('Size:'),
+                                            title: Text(
+                                                '${_megabytesFromBytes(track.size)} MB'),
+                                          ),
+                                          ListTile(
+                                            leading: const Text('Extension:'),
+                                            title: Text(_trackExtension(
+                                                track.displayName)),
+                                          ),
+                                          ListTile(
+                                            leading: const Text('Duration:'),
+                                            title: Text(_durationFormatter(
+                                                track.duration ?? 0)),
+                                          ),
+                                          ListTile(
+                                            leading: const Text('Date Added:'),
+                                            title: Text(_dateFromTimestamp(
+                                                    track.dateAdded ?? 0)
+                                                .toString()),
+                                          ),
+                                          ListTile(
+                                            leading:
+                                                const Text('Date Modified:'),
+                                            title: Text(_dateFromTimestamp(
+                                                    track.dateModified ?? 0)
+                                                .toString()),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                });
+                          },
+                          iconSize: 40.0,
+                        ),
+                        const Text('Info'),
+                      ],
                     ),
-                    const Text('Info'),
                   ],
                 ),
-              ],
-            ),
+              );
+            },
           );
         });
-  }
-
-  void _isFavorite(List<FavoritesEntity> favorites) {
-    for (FavoritesEntity favorite in favorites) {
-      queryManager.isFavorite(favorite);
-    }
   }
 
   CircleAvatar _buildCircleAvatar(int index) {
@@ -353,13 +361,6 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
               ens, playlists[_playlistIndex].key);
           setState(() {});
         }
-        if (value == 'Delete playlist') {
-          // if (mounted) Navigator.pop(context, true);
-          /// Pending feature - its not working as expected
-          if (mounted) Navigator.pop(context, true);
-          queryManager.deletePlaylist(playlists[_playlistIndex].key);
-          setState(() {});
-        }
       },
       itemBuilder: (context) {
         return <PopupMenuEntry>[
@@ -370,14 +371,6 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
           const PopupMenuItem(
             value: 'Clear all',
             child: Text('Clear all'),
-          ),
-          const PopupMenuItem(
-            value: 'Sort items',
-            child: Text('Sort items'),
-          ),
-          const PopupMenuItem(
-            value: 'Delete playlist',
-            child: Text('Delete playlist'),
           ),
         ];
       },

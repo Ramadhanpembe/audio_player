@@ -8,11 +8,8 @@ class QueryManager {
     _init();
   }
 
-  final isFavoriteNotifier = ValueNotifier<bool>(false);
-
-  void isFavorite(FavoritesEntity favorite) async {
-    bool isFavorite = await audioRoom.checkIn(RoomType.FAVORITES, favorite.id);
-    isFavoriteNotifier.value = isFavorite == true;
+  Future<bool> isFavorite(SongModel model) {
+    return audioRoom.checkIn(RoomType.FAVORITES, model.id);
   }
 
   Future<List<PlaylistEntity>> get initPlaylists async {
@@ -22,6 +19,13 @@ class QueryManager {
   /// favorites
   Future<List<FavoritesEntity>> get initFavorites async {
     return await audioRoom.queryFavorites();
+
+    /// amended
+    // List<FavoritesEntity> favoritesEntities = await audioRoom.queryFavorites();
+    // for (FavoritesEntity favorite in favoritesEntities) {
+    //   isFavorite(favorite);
+    // }
+    // return favoritesEntities;
   }
 
   Future<List<SongModel>> get initSongs async {
@@ -124,9 +128,18 @@ class QueryManager {
     await audioRoom.deletePlaylist(playlistKey);
   }
 
+  void getAllPlaylists() async {
+    await audioRoom.queryPlaylists();
+  }
+
   /// add to favorites
   void addToFavorite(FavoritesEntity favorite) async {
     await audioRoom.addTo(RoomType.FAVORITES, favorite);
+  }
+
+  /// remove from favorites
+  void removeFromFavorite(SongModel model) async {
+    await audioRoom.deleteFrom(RoomType.FAVORITES, model.id);
   }
 
   /// change from favorites to song
