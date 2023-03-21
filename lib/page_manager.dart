@@ -215,5 +215,9 @@ class PlayerManager {
 
   void remove() {}
 
-  void dispose() {}
+  void dispose() {
+    // dispose here
+  }
 }
+
+/////////////////////////////////////// checking out/////////////////////////////////////////////
