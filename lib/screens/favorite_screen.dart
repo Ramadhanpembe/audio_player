@@ -2,8 +2,12 @@ import 'package:audio_player/logics/player_query_resources.dart';
 import 'package:audio_player/main.dart';
 import 'package:audio_player/screens/player_screen.dart';
 import 'package:audio_player/utils/constants.dart';
+import 'package:audio_player/widgets/empty_list_indicator.dart';
+import 'package:audio_player/widgets/error_indicator.dart';
+import 'package:audio_player/widgets/loading_indicator.dart';
+import 'package:audio_player/widgets/rounded_avatar.dart';
+import 'package:audio_player/widgets/track_info_box.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:on_audio_room/details/rooms/favorites/favorites_entity.dart';
 
@@ -21,10 +25,10 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
       future: favoritesEntities,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return _buildProgressIndicator(message: 'Loading');
+          return const LoadingIndicator();
         }
         if (snapshot.hasError) {
-          return _buildErrorIndicator(message: 'Error in getting favorites');
+          return const ErrorIndicator();
         }
         if (snapshot.hasData) {
           favorites = snapshot.data!;
@@ -35,7 +39,10 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
             itemBuilder: (context, index) {
               return ListTile(
                 visualDensity: VisualDensity.comfortable,
-                leading: _buildCircleAvatar(index),
+                leading: RoundedAvatar(
+                  models: addedFavorites,
+                  index: index,
+                ),
                 title: Text(
                   addedFavorites[index].title,
                   style: kTileTitleStyle,
@@ -61,69 +68,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
             },
           );
         }
-        return _buildEmptyIndicator(message: 'No favorite found');
+        return const EmptyListIndicator();
       },
-    );
-  }
-
-  // void _isFavorite(List<FavoritesEntity> favorites) {
-  //   for (FavoritesEntity favorite in favorites) {
-  //     queryManager.isFavorite(favorite);
-  //   }
-  // }
-
-  String _dateFromTimestamp(int timestamp) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    DateFormat dateFormat = DateFormat('yyyy-MM-dd');
-    return dateFormat.format(dateTime);
-  }
-
-  String _megabytesFromBytes(int bytes) {
-    return (bytes / 1000000).toStringAsFixed(2);
-  }
-
-  String _trackExtension(String name) {
-    int periodIndex = name.indexOf('.');
-    return name.substring(periodIndex);
-  }
-
-  String _durationFormatter(int milliseconds) {
-    Duration duration = Duration(milliseconds: milliseconds);
-    String formatDuration(int n) => n.toString().padLeft(2, '0');
-    String minutes = formatDuration(duration.inMinutes.remainder(60));
-    String seconds = formatDuration(duration.inSeconds.remainder(60));
-    return '${formatDuration(duration.inHours)}:$minutes:$seconds';
-  }
-
-  Center _buildEmptyIndicator({required String message}) {
-    return Center(
-      child: Text(message),
-    );
-  }
-
-  Text _buildErrorIndicator({required String message}) => Text(message);
-
-  Center _buildProgressIndicator({required String message}) {
-    return Center(
-      child: Text(message),
-    );
-  }
-
-  CircleAvatar _buildCircleAvatar(int index) {
-    return CircleAvatar(
-      backgroundColor: kCircleAvatarColor,
-      radius: 26.0,
-      child: QueryArtworkWidget(
-        id: addedFavorites[index].id,
-        type: ArtworkType.AUDIO,
-        keepOldArtwork: true,
-        nullArtworkWidget: Image.asset(
-          'images/musical_notes.png',
-          filterQuality: FilterQuality.high,
-          fit: BoxFit.fill,
-          color: kMusicIconColor,
-        ),
-      ),
     );
   }
 
@@ -176,7 +122,10 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                             builder: (context) {
                               return AlertDialog(
                                 backgroundColor: kDialogColor,
-                                title: const Text('Track Details'),
+                                title: const Text(
+                                  'Track Details',
+                                  style: TextStyle(color: kPrimaryColor),
+                                ),
                                 actions: [
                                   FilledButton(
                                     child: const Text('OKAY'),
@@ -185,105 +134,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                     },
                                   ),
                                 ],
-                                content: SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.9,
-                                  height: MediaQuery.of(context).size.height * 0.5,
-                                  child: SingleChildScrollView(
-                                    child: Column(
-                                      children: [
-                                        ListTile(
-                                          leading: const Text(
-                                            'Title:',
-                                            style: kInfoDialogItemTitleStyle,
-                                          ),
-                                          title: Text(
-                                            track.title,
-                                            style: kInfoDialogItemDetailStyle,
-                                          ),
-                                        ),
-                                        ListTile(
-                                          leading: const Text(
-                                            'Album:',
-                                            style: kInfoDialogItemTitleStyle,
-                                          ),
-                                          title: Text(
-                                            track.album ?? '<unknown>',
-                                            style: kInfoDialogItemDetailStyle,
-                                          ),
-                                        ),
-                                        ListTile(
-                                          leading: const Text(
-                                            'Artist:',
-                                            style: kInfoDialogItemTitleStyle,
-                                          ),
-                                          title: Text(
-                                            track.artist ?? '<unknown>',
-                                            style: kInfoDialogItemDetailStyle,
-                                          ),
-                                        ),
-                                        ListTile(
-                                          leading: const Text(
-                                            'Genre:',
-                                            style: kInfoDialogItemTitleStyle,
-                                          ),
-                                          title: Text(
-                                            track.genre ?? '<unknown>',
-                                            style: kInfoDialogItemDetailStyle,
-                                          ),
-                                        ),
-                                        ListTile(
-                                          leading: const Text(
-                                            'Size:',
-                                            style: kInfoDialogItemTitleStyle,
-                                          ),
-                                          title: Text(
-                                            '${_megabytesFromBytes(track.size)} MB',
-                                            style: kInfoDialogItemDetailStyle,
-                                          ),
-                                        ),
-                                        ListTile(
-                                          leading: const Text(
-                                            'Extension:',
-                                            style: kInfoDialogItemTitleStyle,
-                                          ),
-                                          title: Text(
-                                            _trackExtension(track.displayName),
-                                            style: kInfoDialogItemDetailStyle,
-                                          ),
-                                        ),
-                                        ListTile(
-                                          leading: const Text(
-                                            'Duration:',
-                                            style: kInfoDialogItemTitleStyle,
-                                          ),
-                                          title: Text(
-                                            _durationFormatter(track.duration ?? 0),
-                                            style: kInfoDialogItemDetailStyle,
-                                          ),
-                                        ),
-                                        ListTile(
-                                          leading: const Text(
-                                            'Date Added:',
-                                            style: kInfoDialogItemTitleStyle,
-                                          ),
-                                          title: Text(
-                                            _dateFromTimestamp(track.dateAdded ?? 0).toString(),
-                                            style: kInfoDialogItemDetailStyle,
-                                          ),
-                                        ),
-                                        ListTile(
-                                          leading: const Text(
-                                            'Date Modified:',
-                                            style: kInfoDialogItemTitleStyle,
-                                          ),
-                                          title: Text(
-                                            _dateFromTimestamp(track.dateModified ?? 0).toString(),
-                                            style: kInfoDialogItemDetailStyle,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                content: TrackInfoBox(
+                                  context: context,
+                                  track: track,
                                 ),
                               );
                             });

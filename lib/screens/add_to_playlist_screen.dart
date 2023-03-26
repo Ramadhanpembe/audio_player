@@ -1,7 +1,7 @@
 import 'package:audio_player/logics/player_query_resources.dart';
 import 'package:audio_player/utils/constants.dart';
+import 'package:audio_player/widgets/rounded_avatar.dart';
 import 'package:flutter/material.dart';
-import 'package:on_audio_query/on_audio_query.dart';
 import 'package:on_audio_room/on_audio_room.dart';
 
 import '../main.dart';
@@ -88,20 +88,9 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
                   tracks.elementAt(index).album ?? '',
                   style: kTileAlbumStyle,
                 ),
-                secondary: CircleAvatar(
-                  backgroundColor: kCircleAvatarColor,
-                  radius: 26.0,
-                  child: QueryArtworkWidget(
-                    id: tracks[index].id,
-                    type: ArtworkType.AUDIO,
-                    keepOldArtwork: true,
-                    nullArtworkWidget: Image.asset(
-                      'images/musical_notes.png',
-                      filterQuality: FilterQuality.high,
-                      fit: BoxFit.fill,
-                      color: kMusicIconColor,
-                    ),
-                  ),
+                secondary: RoundedAvatar(
+                  models: tracks,
+                  index: index,
                 ),
                 onChanged: (bool? value) async {
                   bool isPreAdded = await queryManager.isPreAdded(

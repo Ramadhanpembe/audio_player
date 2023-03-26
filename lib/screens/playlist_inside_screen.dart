@@ -4,10 +4,15 @@ import 'package:audio_player/main.dart';
 import 'package:audio_player/screens/add_to_playlist_screen.dart';
 import 'package:audio_player/screens/player_screen.dart';
 import 'package:audio_player/utils/constants.dart';
+import 'package:audio_player/widgets/empty_list_indicator.dart';
+import 'package:audio_player/widgets/loading_indicator.dart';
+import 'package:audio_player/widgets/rounded_avatar.dart';
+import 'package:audio_player/widgets/track_info_box.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:on_audio_room/on_audio_room.dart';
+
+import '../widgets/error_indicator.dart';
 
 class PlaylistInsideScreen extends StatefulWidget {
   const PlaylistInsideScreen({super.key, required this.playlistIndex});
@@ -82,10 +87,10 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
       future: _allFromPlaylist,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return _buildProgressIndicator(message: 'Loading...');
+          return const LoadingIndicator();
         }
         if (snapshot.hasError) {
-          return _buildErrorIndicator(message: 'Error in fetching the list!!');
+          return const ErrorIndicator();
         }
         if (snapshot.hasData) {
           addedEntities = snapshot.data!;
@@ -96,7 +101,10 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
             itemBuilder: (context, index) {
               return ListTile(
                 visualDensity: VisualDensity.comfortable,
-                leading: _buildCircleAvatar(index),
+                leading: RoundedAvatar(
+                  models: addedTracks,
+                  index: index,
+                ),
                 title: Text(
                   addedTracks[index].title,
                   style: kTileTitleStyle,
@@ -123,7 +131,7 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
             },
           );
         }
-        return _buildEmptyIndicator(message: 'No track found!');
+        return const EmptyListIndicator();
       },
     );
   }
@@ -131,29 +139,6 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
   Future<List<SongEntity>> get _allFromPlaylist async {
     setState(() {});
     return await queryManager.getAllFromPlaylist(playlists[_playlistIndex].key);
-  }
-
-  String _dateFromTimestamp(int timestamp) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    DateFormat dateFormat = DateFormat('yyyy-MM-dd');
-    return dateFormat.format(dateTime);
-  }
-
-  String _megabytesFromBytes(int bytes) {
-    return (bytes / 1000000).toStringAsFixed(2);
-  }
-
-  String _trackExtension(String name) {
-    int periodIndex = name.indexOf('.');
-    return name.substring(periodIndex);
-  }
-
-  String _durationFormatter(int milliseconds) {
-    Duration duration = Duration(milliseconds: milliseconds);
-    String formatDuration(int n) => n.toString().padLeft(2, '0');
-    String minutes = formatDuration(duration.inMinutes.remainder(60));
-    String seconds = formatDuration(duration.inSeconds.remainder(60));
-    return '${formatDuration(duration.inHours)}:$minutes:$seconds';
   }
 
   void _showModalBottomSheet(int index, SongModel track, bool isFavorite) {
@@ -248,106 +233,9 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                                         },
                                       ),
                                     ],
-                                    content: SizedBox(
-                                      width: MediaQuery.of(context).size.width * 0.9,
-                                      height: MediaQuery.of(context).size.height * 0.5,
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          children: [
-                                            ListTile(
-                                              leading: const Text(
-                                                'Title:',
-                                                style: kInfoDialogItemTitleStyle,
-                                              ),
-                                              title: Text(
-                                                track.title,
-                                                style: kInfoDialogItemDetailStyle,
-                                              ),
-                                            ),
-                                            ListTile(
-                                              leading: const Text(
-                                                'Album:',
-                                                style: kInfoDialogItemTitleStyle,
-                                              ),
-                                              title: Text(
-                                                track.album ?? '<unknown>',
-                                                style: kInfoDialogItemDetailStyle,
-                                              ),
-                                            ),
-                                            ListTile(
-                                              leading: const Text(
-                                                'Artist:',
-                                                style: kInfoDialogItemTitleStyle,
-                                              ),
-                                              title: Text(
-                                                track.artist ?? '<unknown>',
-                                                style: kInfoDialogItemDetailStyle,
-                                              ),
-                                            ),
-                                            ListTile(
-                                              leading: const Text(
-                                                'Genre:',
-                                                style: kInfoDialogItemTitleStyle,
-                                              ),
-                                              title: Text(
-                                                track.genre ?? '<unknown>',
-                                                style: kInfoDialogItemDetailStyle,
-                                              ),
-                                            ),
-                                            ListTile(
-                                              leading: const Text(
-                                                'Size:',
-                                                style: kInfoDialogItemTitleStyle,
-                                              ),
-                                              title: Text(
-                                                '${_megabytesFromBytes(track.size)} MB',
-                                                style: kInfoDialogItemDetailStyle,
-                                              ),
-                                            ),
-                                            ListTile(
-                                              leading: const Text(
-                                                'Extension:',
-                                                style: kInfoDialogItemTitleStyle,
-                                              ),
-                                              title: Text(
-                                                _trackExtension(track.displayName),
-                                                style: kInfoDialogItemDetailStyle,
-                                              ),
-                                            ),
-                                            ListTile(
-                                              leading: const Text(
-                                                'Duration:',
-                                                style: kInfoDialogItemTitleStyle,
-                                              ),
-                                              title: Text(
-                                                _durationFormatter(track.duration ?? 0),
-                                                style: kInfoDialogItemDetailStyle,
-                                              ),
-                                            ),
-                                            ListTile(
-                                              leading: const Text(
-                                                'Date Added:',
-                                                style: kInfoDialogItemTitleStyle,
-                                              ),
-                                              title: Text(
-                                                _dateFromTimestamp(track.dateAdded ?? 0).toString(),
-                                                style: kInfoDialogItemDetailStyle,
-                                              ),
-                                            ),
-                                            ListTile(
-                                              leading: const Text(
-                                                'Date Modified:',
-                                                style: kInfoDialogItemTitleStyle,
-                                              ),
-                                              title: Text(
-                                                _dateFromTimestamp(track.dateModified ?? 0)
-                                                    .toString(),
-                                                style: kInfoDialogItemDetailStyle,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                    content: TrackInfoBox(
+                                      context: context,
+                                      track: track,
                                     ),
                                   );
                                 });
@@ -366,38 +254,6 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
             },
           );
         });
-  }
-
-  CircleAvatar _buildCircleAvatar(int index) {
-    return CircleAvatar(
-      backgroundColor: kCircleAvatarColor,
-      radius: 26.0,
-      child: QueryArtworkWidget(
-        id: addedTracks[index].id,
-        type: ArtworkType.AUDIO,
-        keepOldArtwork: true,
-        nullArtworkWidget: Image.asset(
-          'images/musical_notes.png',
-          filterQuality: FilterQuality.high,
-          fit: BoxFit.fill,
-          color: kMusicIconColor,
-        ),
-      ),
-    );
-  }
-
-  Center _buildEmptyIndicator({required String message}) {
-    return Center(
-      child: Text(message),
-    );
-  }
-
-  Text _buildErrorIndicator({required String message}) => Text(message);
-
-  Center _buildProgressIndicator({required String message}) {
-    return Center(
-      child: Text(message),
-    );
   }
 
   PopupMenuButton<dynamic> _buildPopupMenuButton(BuildContext context) {

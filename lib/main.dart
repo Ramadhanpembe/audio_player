@@ -3,6 +3,7 @@ import 'package:audio_player/logics/query_manager.dart';
 import 'package:audio_player/screens/home_screen.dart';
 import 'package:audio_player/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:on_audio_room/on_audio_room.dart';
 
 import 'logics/player_manager.dart';
@@ -40,6 +41,10 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

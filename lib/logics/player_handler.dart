@@ -14,7 +14,7 @@ Future<AudioHandler> initAudioService() async {
       androidStopForegroundOnPause: true,
 
       /// Add androidNotificationIcon here
-      // androidNotificationIcon:
+      androidNotificationIcon: 'mipmap/notification_icon',
     ),
   );
   return audioHandler;
