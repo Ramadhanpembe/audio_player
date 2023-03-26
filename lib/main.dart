@@ -1,6 +1,7 @@
 import 'package:audio_player/logics/player_handler.dart';
 import 'package:audio_player/logics/query_manager.dart';
 import 'package:audio_player/screens/home_screen.dart';
+import 'package:audio_player/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:on_audio_room/on_audio_room.dart';
 
@@ -42,9 +43,9 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        /// Creates a uniform splash color when any button or field is clicked or pressed.
-        primarySwatch: Colors.indigo,
-      ),
+          colorScheme: ColorScheme.fromSwatch().copyWith(
+        primary: kPrimaryColor,
+      )),
       home: const HomeScreen(),
     );
   }

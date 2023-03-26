@@ -1,6 +1,7 @@
 import 'package:audio_player/logics/player_query_resources.dart';
 import 'package:audio_player/main.dart';
 import 'package:audio_player/screens/player_screen.dart';
+import 'package:audio_player/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -28,25 +29,31 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         if (snapshot.hasData) {
           favorites = snapshot.data!;
 
-          /// check if favorite here
-          // _isFavorite(favorites);
           addedFavorites = queryManager.favoriteToSongAdapter(favorites);
           return ListView.builder(
             itemCount: addedFavorites.length,
             itemBuilder: (context, index) {
               return ListTile(
+                visualDensity: VisualDensity.comfortable,
                 leading: _buildCircleAvatar(index),
-                title: Text(addedFavorites[index].displayName),
-                subtitle: Text(addedFavorites[index].title),
+                title: Text(
+                  addedFavorites[index].title,
+                  style: kTileTitleStyle,
+                ),
+                subtitle: Text(
+                  addedFavorites[index].album ?? '',
+                  style: kTileAlbumStyle,
+                ),
                 trailing: IconButton(
                   icon: const Icon(Icons.more_horiz),
+                  color: kTileAlbumColor,
                   onPressed: () async {
                     _showModalBottomSheet(index, addedFavorites[index]);
                   },
                 ),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const PlayerScreen()));
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
                   playerManager.setPlaylist(index, addedFavorites);
                   playerManager.play();
                 },
@@ -104,8 +111,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
 
   CircleAvatar _buildCircleAvatar(int index) {
     return CircleAvatar(
-      backgroundColor: Colors.indigo,
-      radius: 30.0,
+      backgroundColor: kCircleAvatarColor,
+      radius: 26.0,
       child: QueryArtworkWidget(
         id: addedFavorites[index].id,
         type: ArtworkType.AUDIO,
@@ -114,7 +121,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           'images/musical_notes.png',
           filterQuality: FilterQuality.high,
           fit: BoxFit.fill,
-          color: Colors.white,
+          color: kMusicIconColor,
         ),
       ),
     );
@@ -125,7 +132,15 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         isScrollControlled: true,
         context: context,
         builder: (context) {
-          return SizedBox(
+          return Container(
+            decoration: const BoxDecoration(
+                color: kPrimaryColor,
+                border: Border(
+                  top: BorderSide(
+                    color: kPrimaryColor,
+                    width: 1.0,
+                  ),
+                )),
             height: MediaQuery.of(context).size.height * 0.1,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -133,9 +148,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                 Column(
                   children: [
                     IconButton(
+                      color: kIconColor,
                       icon: const Icon(Icons.delete_outline),
                       onPressed: () {
-                        /// remove from favorites here
                         queryManager.removeFromFavorite(track);
                         Navigator.pop(context);
                         setState(() {});
@@ -143,12 +158,16 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                       },
                       iconSize: 40.0,
                     ),
-                    const Text('Remove'),
+                    const Text(
+                      'Remove',
+                      style: kTileTitleStyle,
+                    ),
                   ],
                 ),
                 Column(
                   children: [
                     IconButton(
+                      color: kIconColor,
                       icon: const Icon(Icons.info_outline),
                       onPressed: () {
                         Navigator.pop(context);
@@ -156,63 +175,114 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                             context: context,
                             builder: (context) {
                               return AlertDialog(
+                                backgroundColor: kDialogColor,
                                 title: const Text('Track Details'),
                                 actions: [
-                                  TextButton(
-                                    child: const Text('Okay'),
+                                  FilledButton(
+                                    child: const Text('OKAY'),
                                     onPressed: () {
                                       Navigator.pop(context);
                                     },
                                   ),
                                 ],
-                                content: SingleChildScrollView(
-                                  child: Column(
-                                    children: [
-                                      ListTile(
-                                        leading: const Text('Title:'),
-                                        title: Text(track.title),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Album:'),
-                                        title: Text(track.album ?? '<unknown>'),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Artist:'),
-                                        title:
-                                            Text(track.artist ?? '<unknown>'),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Genre:'),
-                                        title: Text(track.genre ?? '<unknown>'),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Size:'),
-                                        title: Text(
-                                            '${_megabytesFromBytes(track.size)} MB'),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Extension:'),
-                                        title: Text(
-                                            _trackExtension(track.displayName)),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Duration:'),
-                                        title: Text(_durationFormatter(
-                                            track.duration ?? 0)),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Date Added:'),
-                                        title: Text(_dateFromTimestamp(
-                                                track.dateAdded ?? 0)
-                                            .toString()),
-                                      ),
-                                      ListTile(
-                                        leading: const Text('Date Modified:'),
-                                        title: Text(_dateFromTimestamp(
-                                                track.dateModified ?? 0)
-                                            .toString()),
-                                      ),
-                                    ],
+                                content: SizedBox(
+                                  width: MediaQuery.of(context).size.width * 0.9,
+                                  height: MediaQuery.of(context).size.height * 0.5,
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      children: [
+                                        ListTile(
+                                          leading: const Text(
+                                            'Title:',
+                                            style: kInfoDialogItemTitleStyle,
+                                          ),
+                                          title: Text(
+                                            track.title,
+                                            style: kInfoDialogItemDetailStyle,
+                                          ),
+                                        ),
+                                        ListTile(
+                                          leading: const Text(
+                                            'Album:',
+                                            style: kInfoDialogItemTitleStyle,
+                                          ),
+                                          title: Text(
+                                            track.album ?? '<unknown>',
+                                            style: kInfoDialogItemDetailStyle,
+                                          ),
+                                        ),
+                                        ListTile(
+                                          leading: const Text(
+                                            'Artist:',
+                                            style: kInfoDialogItemTitleStyle,
+                                          ),
+                                          title: Text(
+                                            track.artist ?? '<unknown>',
+                                            style: kInfoDialogItemDetailStyle,
+                                          ),
+                                        ),
+                                        ListTile(
+                                          leading: const Text(
+                                            'Genre:',
+                                            style: kInfoDialogItemTitleStyle,
+                                          ),
+                                          title: Text(
+                                            track.genre ?? '<unknown>',
+                                            style: kInfoDialogItemDetailStyle,
+                                          ),
+                                        ),
+                                        ListTile(
+                                          leading: const Text(
+                                            'Size:',
+                                            style: kInfoDialogItemTitleStyle,
+                                          ),
+                                          title: Text(
+                                            '${_megabytesFromBytes(track.size)} MB',
+                                            style: kInfoDialogItemDetailStyle,
+                                          ),
+                                        ),
+                                        ListTile(
+                                          leading: const Text(
+                                            'Extension:',
+                                            style: kInfoDialogItemTitleStyle,
+                                          ),
+                                          title: Text(
+                                            _trackExtension(track.displayName),
+                                            style: kInfoDialogItemDetailStyle,
+                                          ),
+                                        ),
+                                        ListTile(
+                                          leading: const Text(
+                                            'Duration:',
+                                            style: kInfoDialogItemTitleStyle,
+                                          ),
+                                          title: Text(
+                                            _durationFormatter(track.duration ?? 0),
+                                            style: kInfoDialogItemDetailStyle,
+                                          ),
+                                        ),
+                                        ListTile(
+                                          leading: const Text(
+                                            'Date Added:',
+                                            style: kInfoDialogItemTitleStyle,
+                                          ),
+                                          title: Text(
+                                            _dateFromTimestamp(track.dateAdded ?? 0).toString(),
+                                            style: kInfoDialogItemDetailStyle,
+                                          ),
+                                        ),
+                                        ListTile(
+                                          leading: const Text(
+                                            'Date Modified:',
+                                            style: kInfoDialogItemTitleStyle,
+                                          ),
+                                          title: Text(
+                                            _dateFromTimestamp(track.dateModified ?? 0).toString(),
+                                            style: kInfoDialogItemDetailStyle,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
@@ -220,7 +290,10 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                       },
                       iconSize: 40.0,
                     ),
-                    const Text('Info'),
+                    const Text(
+                      'Info',
+                      style: kTileTitleStyle,
+                    ),
                   ],
                 ),
               ],

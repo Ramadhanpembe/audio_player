@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:on_audio_room/on_audio_room.dart';
@@ -39,3 +40,5 @@ late Future<List<FavoritesEntity>> favoritesEntities;
 late Future<List<SongModel>> songModels;
 
 late bool isFavorite;
+
+final isBackArrowClickedNotifier = ValueNotifier<bool>(false);

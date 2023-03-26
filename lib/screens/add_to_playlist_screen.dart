@@ -1,4 +1,5 @@
 import 'package:audio_player/logics/player_query_resources.dart';
+import 'package:audio_player/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:on_audio_room/on_audio_room.dart';
@@ -22,8 +23,7 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
   }
 
   void _showSnackBar() {
-    const snackBar =
-        SnackBar(content: Center(child: Text('The track is already added!')));
+    const snackBar = SnackBar(content: Center(child: Text('The track is already added!')));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
@@ -63,53 +63,61 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
                   Navigator.pop(context, true);
                 });
               },
-              iconSize: 50.0,
+              iconSize: 30.0,
             ),
           ),
         ],
       ),
       body: SafeArea(
-        child: ListView.builder(
-          itemCount: tracks.length,
-          itemBuilder: (context, index) {
-            return CheckboxListTile(
-              value: isChecked[index],
-              selected: isChecked[index]!,
-              checkColor: Colors.red,
-              activeColor: Colors.tealAccent,
-              title: Text(tracks.elementAt(index).displayName),
-              subtitle: Text(tracks.elementAt(index).title),
-              secondary: CircleAvatar(
-                backgroundColor: Colors.indigo,
-                radius: 30.0,
-                child: QueryArtworkWidget(
-                  id: tracks[index].id,
-                  type: ArtworkType.AUDIO,
-                  keepOldArtwork: true,
-                  nullArtworkWidget: Image.asset(
-                    'images/musical_notes.png',
-                    filterQuality: FilterQuality.high,
-                    fit: BoxFit.fill,
-                    color: Colors.white,
+        child: Container(
+          color: kSearchDelegateColor,
+          child: ListView.builder(
+            itemCount: tracks.length,
+            itemBuilder: (context, index) {
+              return CheckboxListTile(
+                visualDensity: VisualDensity.comfortable,
+                value: isChecked[index],
+                selected: isChecked[index]!,
+                checkColor: kPrimaryColor,
+                activeColor: kTileTitleColor,
+                title: Text(
+                  tracks.elementAt(index).title,
+                  style: kTileTitleStyle,
+                ),
+                subtitle: Text(
+                  tracks.elementAt(index).album ?? '',
+                  style: kTileAlbumStyle,
+                ),
+                secondary: CircleAvatar(
+                  backgroundColor: kCircleAvatarColor,
+                  radius: 26.0,
+                  child: QueryArtworkWidget(
+                    id: tracks[index].id,
+                    type: ArtworkType.AUDIO,
+                    keepOldArtwork: true,
+                    nullArtworkWidget: Image.asset(
+                      'images/musical_notes.png',
+                      filterQuality: FilterQuality.high,
+                      fit: BoxFit.fill,
+                      color: kMusicIconColor,
+                    ),
                   ),
                 ),
-              ),
-              onChanged: (bool? value) async {
-                bool isPreAdded = await queryManager.isPreAdded(
-                    RoomType.PLAYLIST,
-                    entities[index].id,
-                    playlists[_playlistIndex].key);
-                setState(() {
-                  if (isPreAdded) {
-                    isChecked[index] = false;
-                    _showSnackBar();
-                  } else {
-                    isChecked[index] = value;
-                  }
-                });
-              },
-            );
-          },
+                onChanged: (bool? value) async {
+                  bool isPreAdded = await queryManager.isPreAdded(
+                      RoomType.PLAYLIST, entities[index].id, playlists[_playlistIndex].key);
+                  setState(() {
+                    if (isPreAdded) {
+                      isChecked[index] = false;
+                      _showSnackBar();
+                    } else {
+                      isChecked[index] = value;
+                    }
+                  });
+                },
+              );
+            },
+          ),
         ),
       ),
     );

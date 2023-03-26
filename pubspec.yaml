@@ -22,6 +22,8 @@ dependencies:
   on_audio_room: ^2.2.1+1
   intl: ^0.18.0
   audio_service: ^0.18.9
+  back_button_interceptor: ^6.0.2
+  marquee: ^2.2.3
 
 
 

@@ -37,10 +37,8 @@ class QueryManager {
     );
   }
 
-  Future<bool> isPreAdded(
-      RoomType roomType, int entityId, int playlistKey) async {
-    return await audioRoom.checkIn(roomType, entityId,
-        playlistKey: playlistKey);
+  Future<bool> isPreAdded(RoomType roomType, int entityId, int playlistKey) async {
+    return await audioRoom.checkIn(roomType, entityId, playlistKey: playlistKey);
   }
 
   Future<List<SongEntity>> getAllFromPlaylist(int? playlistKey) async {
@@ -103,13 +101,11 @@ class QueryManager {
     }
     addedEntities.removeWhere((element) => toBeRemoved.contains(element));
     if (addedEntities.isEmpty) return;
-    await audioRoom.addAllTo(RoomType.PLAYLIST, addedEntities,
-        playlistKey: playlistKey);
+    await audioRoom.addAllTo(RoomType.PLAYLIST, addedEntities, playlistKey: playlistKey);
   }
 
   void removeFromPlaylist(int entityKey, int playlistKey) async {
-    await audioRoom.deleteFrom(RoomType.PLAYLIST, entityKey,
-        playlistKey: playlistKey);
+    await audioRoom.deleteFrom(RoomType.PLAYLIST, entityKey, playlistKey: playlistKey);
   }
 
   // entityIds are the same as the modelIds
@@ -132,19 +128,15 @@ class QueryManager {
     await audioRoom.queryPlaylists();
   }
 
-  /// add to favorites
   void addToFavorite(FavoritesEntity favorite) async {
     await audioRoom.addTo(RoomType.FAVORITES, favorite);
   }
 
-  /// remove from favorites
   void removeFromFavorite(SongModel model) async {
     await audioRoom.deleteFrom(RoomType.FAVORITES, model.id);
   }
 
-  /// change from favorites to song
-  List<SongModel> favoriteToSongAdapter(
-      List<FavoritesEntity> favoritesEntities) {
+  List<SongModel> favoriteToSongAdapter(List<FavoritesEntity> favoritesEntities) {
     List<SongEntity> entities = [];
     for (FavoritesEntity favorite in favoritesEntities) {
       entities.add(favorite.getMap.toSongEntity());
