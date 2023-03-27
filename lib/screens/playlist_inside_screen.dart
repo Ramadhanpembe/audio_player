@@ -27,20 +27,26 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
   final TextEditingController controller = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return _buildPlaylistInsideScreen(context);
   }
 
   Scaffold _buildPlaylistInsideScreen(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 100.0,
         title: Text(playlists[_playlistIndex].playlistName),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            playlistEntities = queryManager.initPlaylists;
+            queryManager.updatePlaylist(playlists[_playlistIndex]);
+            setState(() {});
+            Navigator.pop(context, true);
+            setState(() {});
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_outlined),
@@ -61,8 +67,8 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () {
-              showSearch(
+            onPressed: () async {
+              await showSearch(
                 context: context,
                 delegate: CustomSearchDelegate(list: addedTracks),
               );
@@ -98,34 +104,55 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
 
           return ListView.builder(
             itemCount: addedTracks.length,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             itemBuilder: (context, index) {
-              return ListTile(
-                visualDensity: VisualDensity.comfortable,
-                leading: RoundedAvatar(
-                  models: addedTracks,
-                  index: index,
-                ),
-                title: Text(
-                  addedTracks[index].title,
-                  style: kTileTitleStyle,
-                ),
-                subtitle: Text(
-                  addedTracks[index].album ?? '',
-                  style: kTileAlbumStyle,
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.more_horiz),
-                  color: kTileAlbumColor,
-                  onPressed: () async {
-                    isFavorite = await queryManager.isFavorite(addedTracks[index]);
-                    _showModalBottomSheet(index, addedTracks[index], isFavorite);
-                  },
-                ),
-                onTap: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
-                  playerManager.setPlaylist(index, addedTracks);
-                  playerManager.play();
+              return ValueListenableBuilder(
+                valueListenable: isBackArrowClickedNotifier,
+                builder: (_, isClicked, __) {
+                  return ValueListenableBuilder(
+                    valueListenable: playerManager.currentTrackIDNotifier,
+                    builder: (_, id, __) {
+                      return ListTile(
+                        tileColor: isClicked && addedTracks[index].id == id
+                            ? kNowPlayingTileColor
+                            : Colors.transparent,
+                        visualDensity: VisualDensity.comfortable,
+                        leading: RoundedAvatar(
+                          models: addedTracks,
+                          index: index,
+                          isClicked: isClicked,
+                        ),
+                        title: Text(
+                          addedTracks[index].title,
+                          style: isClicked && addedTracks[index].id == id
+                              ? kNowPlayingTitleStyle
+                              : kTileTitleStyle,
+                        ),
+                        subtitle: Text(
+                          addedTracks[index].album ?? '',
+                          style: isClicked && addedTracks[index].id == id
+                              ? kNowPlayingAlbumStyle
+                              : kTileAlbumStyle,
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.more_horiz),
+                          color: isClicked && addedTracks[index].id == id
+                              ? kNowPlayingAlbumColor
+                              : kTileAlbumColor,
+                          onPressed: () async {
+                            isFavorite = await queryManager.isFavorite(addedTracks[index]);
+                            _showModalBottomSheet(index, addedTracks[index], isFavorite);
+                          },
+                        ),
+                        onTap: () {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
+                          playerManager.setPlaylist(index, addedTracks);
+                          playerManager.play();
+                        },
+                      );
+                    },
+                  );
                 },
               );
             },
@@ -293,8 +320,10 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                     child: const Text('CANCEL'),
                   ),
                   FilledButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
+                    onPressed: () async {
+                      queryManager.renamePlaylist(playlists[_playlistIndex].key, controller.text);
+                      setState(() {});
+                      Navigator.pop(context);
                     },
                     child: const Text('OKAY'),
                   ),
@@ -302,7 +331,6 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
               );
             },
           );
-          queryManager.renamePlaylist(playlists[_playlistIndex].key, controller.text);
           playlistEntities = queryManager.initPlaylists;
           setState(() {});
         }

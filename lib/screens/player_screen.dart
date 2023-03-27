@@ -1,5 +1,6 @@
 import 'package:audio_player/notifiers/repeat_button_notifier.dart';
 import 'package:audio_player/utils/constants.dart';
+import 'package:audio_player/utils/utility_functions.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +41,17 @@ class _PlayerScreenState extends State<PlayerScreen> {
     return false;
   }
 
+  SongModel getElement(List<SongModel> models, int id) {
+    SongModel song = SongModel({});
+    for (var model in models) {
+      if (model.id == id) {
+        song = model;
+        break;
+      }
+    }
+    return song;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,25 +70,52 @@ class _PlayerScreenState extends State<PlayerScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ValueListenableBuilder(
-              valueListenable: playerManager.currentTrackIndexNotifier,
-              builder: (_, index, __) {
-                return SizedBox(
-                  height: _toolbarHeight(context) * 0.6,
-                  child: Marquee(
-                    text: tracks[index].title.trim(),
-                    blankSpace: 15.0,
-                    velocity: 60.0,
-                  ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return ValueListenableBuilder(
+                  valueListenable: playerManager.currentTrackTitleNotifier,
+                  builder: (_, title, __) {
+                    return hasTextOverflow(title, kHeaderTitleStyle, maxWidth: constraints.maxWidth)
+                        ? SizedBox(
+                            height: _toolbarHeight(context) * 0.4,
+                            child: Marquee(
+                              text: title,
+                              style: kHeaderTitleStyle,
+                              blankSpace: 15.0,
+                              velocity: 60.0,
+                            ),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Text(
+                              title,
+                              style: kHeaderTitleStyle,
+                            ),
+                          );
+                  },
                 );
               },
             ),
-            ValueListenableBuilder(
-              valueListenable: playerManager.currentTrackIndexNotifier,
-              builder: (_, index, __) {
-                return Text(
-                  tracks[index].album?.trim().toUpperCase() ?? '',
-                  style: const TextStyle(fontSize: 16.0),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return ValueListenableBuilder(
+                  valueListenable: playerManager.currentTrackAlbumNotifier,
+                  builder: (_, album, __) {
+                    return hasTextOverflow(album, kHeaderAlbumStyle, maxWidth: constraints.maxWidth)
+                        ? SizedBox(
+                            height: _toolbarHeight(context) * 0.3,
+                            child: Marquee(
+                              text: album,
+                              style: kHeaderAlbumStyle,
+                              blankSpace: 15.0,
+                              velocity: 60.0,
+                            ),
+                          )
+                        : Text(
+                            album.trim().toUpperCase(),
+                            style: kHeaderAlbumStyle,
+                          );
+                  },
                 );
               },
             ),
@@ -84,393 +123,198 @@ class _PlayerScreenState extends State<PlayerScreen> {
         ),
       ),
       body: SafeArea(
-        child: OrientationBuilder(
-          builder: (BuildContext context, Orientation orientation) {
-            return Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width / 15,
-                  vertical: MediaQuery.of(context).size.height / 30),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: orientation == Orientation.portrait
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ValueListenableBuilder(
-                            valueListenable: playerManager.currentTrackIndexNotifier,
-                            builder: (_, index, __) {
-                              return Expanded(
-                                flex: 4,
-                                child: Container(
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: QueryArtworkWidget(
-                                    id: tracks[index].id,
-                                    type: ArtworkType.AUDIO,
-                                    keepOldArtwork: true,
-                                    artworkQuality: FilterQuality.high,
-                                    artworkBorder: BorderRadius.circular(12),
-                                    nullArtworkWidget: Image.asset(
-                                      'images/music_music.png',
-                                      color: kMusicTonesColor,
-                                      filterQuality: FilterQuality.high,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width / 15,
+              vertical: MediaQuery.of(context).size.height / 30),
+          child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: playerManager.currentTrackIDNotifier,
+                    builder: (_, index, __) {
+                      return Expanded(
+                        flex: 4,
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          Expanded(
-                            flex: 2,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                ValueListenableBuilder<ProgressBarState>(
-                                  valueListenable: playerManager.progressBarNotifier,
-                                  builder: (_, value, __) {
-                                    return _buildProgressBar(value);
-                                  },
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    ValueListenableBuilder(
-                                      valueListenable: playerManager.repeatButtonNotifier,
-                                      builder: (context, value, child) {
-                                        Icon icon;
-                                        switch (value) {
-                                          case RepeatState.off:
-                                            icon =
-                                                const Icon(Icons.repeat, color: kDisabledIconColor);
-                                            break;
-                                          case RepeatState.repeatOne:
-                                            icon = const Icon(
-                                              Icons.repeat_one,
-                                              color: kIconColor,
-                                            );
-                                            break;
-                                          case RepeatState.repeatAll:
-                                            icon = const Icon(
-                                              Icons.repeat,
-                                              color: kIconColor,
-                                            );
-                                            break;
-                                        }
-                                        return IconButton(
-                                          onPressed: () {
-                                            playerManager.repeat();
-                                          },
-                                          icon: icon,
-                                          iconSize: 30.0,
-                                        );
-                                      },
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        ValueListenableBuilder(
-                                          valueListenable: playerManager.isFirstTrackNotifier,
-                                          builder: (_, isFirst, __) {
-                                            return IconButton(
-                                              onPressed: () {
-                                                isFirst ? null : playerManager.previous();
-                                              },
-                                              icon: isFirst
-                                                  ? const FaIcon(
-                                                      FontAwesomeIcons.backwardStep,
-                                                      color: kIconColor,
-                                                    )
-                                                  : const FaIcon(
-                                                      FontAwesomeIcons.backwardStep,
-                                                      color: kIconColor,
-                                                    ),
-                                            );
-                                          },
-                                        ),
-                                        ValueListenableBuilder<PlayButtonState>(
-                                          valueListenable: playerManager.playButtonNotifier,
-                                          builder: (_, value, __) {
-                                            switch (value) {
-                                              case PlayButtonState.loading:
-                                                return IconButton(
-                                                  icon: const Icon(
-                                                    Icons.pause_circle,
-                                                    color: kIconColor,
-                                                  ),
-                                                  iconSize: 80.0,
-                                                  onPressed: () {
-                                                    playerManager.pause();
-                                                  },
-                                                );
-
-                                              case PlayButtonState.paused:
-                                                return IconButton(
-                                                  icon: const Icon(
-                                                    Icons.play_circle,
-                                                    color: kIconColor,
-                                                  ),
-                                                  iconSize: 80.0,
-                                                  onPressed: () {
-                                                    playerManager.play();
-                                                  },
-                                                );
-                                              case PlayButtonState.playing:
-                                                return IconButton(
-                                                  icon: const Icon(
-                                                    Icons.pause_circle,
-                                                    color: kIconColor,
-                                                  ),
-                                                  iconSize: 80.0,
-                                                  onPressed: () {
-                                                    playerManager.pause();
-                                                  },
-                                                );
-                                            }
-                                          },
-                                        ),
-                                        ValueListenableBuilder(
-                                          valueListenable: playerManager.isLastTrackNotifier,
-                                          builder: (_, isLast, __) {
-                                            return IconButton(
-                                              onPressed: () {
-                                                isLast ? null : playerManager.next();
-                                              },
-                                              icon: isLast
-                                                  ? const FaIcon(
-                                                      FontAwesomeIcons.forwardStep,
-                                                      color: kIconColor,
-                                                    )
-                                                  : const FaIcon(
-                                                      FontAwesomeIcons.forwardStep,
-                                                      color: kIconColor,
-                                                    ),
-                                            );
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                    ValueListenableBuilder(
-                                      valueListenable: playerManager.isShuffleModeEnabledNotifier,
-                                      builder: (context, isEnabled, child) {
-                                        return IconButton(
-                                          onPressed: () {
-                                            playerManager.shuffle();
-                                          },
-                                          icon: isEnabled
-                                              ? const FaIcon(
-                                                  Icons.shuffle,
-                                                  color: kIconColor,
-                                                )
-                                              : const FaIcon(
-                                                  Icons.shuffle,
-                                                  color: kDisabledIconColor,
-                                                ),
-                                          iconSize: 30,
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
+                          child: QueryArtworkWidget(
+                            id: index,
+                            type: ArtworkType.AUDIO,
+                            keepOldArtwork: true,
+                            artworkQuality: FilterQuality.high,
+                            artworkBorder: BorderRadius.circular(12),
+                            nullArtworkWidget: Image.asset(
+                              'images/music_music.png',
+                              color: kMusicTonesColor,
+                              filterQuality: FilterQuality.high,
                             ),
                           ),
-                        ],
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ValueListenableBuilder(
-                            valueListenable: playerManager.currentTrackIndexNotifier,
-                            builder: (_, index, __) {
-                              return Expanded(
-                                child: Container(
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: QueryArtworkWidget(
-                                    id: tracks[index].id,
-                                    type: ArtworkType.AUDIO,
-                                    keepOldArtwork: true,
-                                    artworkQuality: FilterQuality.high,
-                                    artworkBorder: BorderRadius.circular(12),
-                                    nullArtworkWidget: Image.asset(
-                                      'images/music_music.png',
-                                      color: const Color(0x0d0C2D48),
-                                      filterQuality: FilterQuality.high,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                        ),
+                      );
+                    },
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ValueListenableBuilder<ProgressBarState>(
+                          valueListenable: playerManager.progressBarNotifier,
+                          builder: (_, value, __) {
+                            return _buildProgressBar(value);
+                          },
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ValueListenableBuilder(
+                              valueListenable: playerManager.repeatButtonNotifier,
+                              builder: (context, value, child) {
+                                Icon icon;
+                                switch (value) {
+                                  case RepeatState.off:
+                                    icon = const Icon(Icons.repeat, color: kDisabledIconColor);
+                                    break;
+                                  case RepeatState.repeatOne:
+                                    icon = const Icon(
+                                      Icons.repeat_one,
+                                      color: kIconColor,
+                                    );
+                                    break;
+                                  case RepeatState.repeatAll:
+                                    icon = const Icon(
+                                      Icons.repeat,
+                                      color: kIconColor,
+                                    );
+                                    break;
+                                }
+                                return IconButton(
+                                  onPressed: () {
+                                    playerManager.repeat();
+                                  },
+                                  icon: icon,
+                                  iconSize: 30.0,
+                                );
+                              },
+                            ),
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  // crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    ValueListenableBuilder(
-                                      valueListenable: playerManager.repeatButtonNotifier,
-                                      builder: (context, value, child) {
-                                        Icon icon;
-                                        switch (value) {
-                                          case RepeatState.off:
-                                            icon =
-                                                const Icon(Icons.repeat, color: kDisabledIconColor);
-                                            break;
-                                          case RepeatState.repeatOne:
-                                            icon = const Icon(
-                                              Icons.repeat_one,
-                                              color: kIconColor,
-                                            );
-                                            break;
-                                          case RepeatState.repeatAll:
-                                            icon = const Icon(
-                                              Icons.repeat,
-                                              color: kIconColor,
-                                            );
-                                            break;
-                                        }
-                                        return IconButton(
-                                          onPressed: () {
-                                            playerManager.repeat();
-                                          },
-                                          icon: icon,
-                                          iconSize: 30.0,
-                                        );
+                                ValueListenableBuilder(
+                                  valueListenable: playerManager.isFirstTrackNotifier,
+                                  builder: (_, isFirst, __) {
+                                    return IconButton(
+                                      onPressed: () {
+                                        isFirst ? null : playerManager.previous();
                                       },
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        ValueListenableBuilder(
-                                          valueListenable: playerManager.isFirstTrackNotifier,
-                                          builder: (_, isFirst, __) {
-                                            return IconButton(
-                                              onPressed: () {
-                                                isFirst ? null : playerManager.previous();
-                                              },
-                                              icon: isFirst
-                                                  ? const FaIcon(
-                                                      FontAwesomeIcons.backwardStep,
-                                                      color: kIconColor,
-                                                    )
-                                                  : const FaIcon(
-                                                      FontAwesomeIcons.backwardStep,
-                                                      color: kIconColor,
-                                                    ),
-                                            );
-                                          },
-                                        ),
-                                        ValueListenableBuilder<PlayButtonState>(
-                                          valueListenable: playerManager.playButtonNotifier,
-                                          builder: (_, value, __) {
-                                            switch (value) {
-                                              case PlayButtonState.loading:
-                                                return IconButton(
-                                                  icon: const Icon(
-                                                    Icons.pause_circle,
-                                                    color: kIconColor,
-                                                  ),
-                                                  iconSize: 80.0,
-                                                  onPressed: () {
-                                                    playerManager.pause();
-                                                  },
-                                                );
-
-                                              case PlayButtonState.paused:
-                                                return IconButton(
-                                                  icon: const Icon(
-                                                    Icons.play_circle,
-                                                    color: kIconColor,
-                                                  ),
-                                                  iconSize: 80.0,
-                                                  onPressed: () {
-                                                    playerManager.play();
-                                                  },
-                                                );
-                                              case PlayButtonState.playing:
-                                                return IconButton(
-                                                  icon: const Icon(
-                                                    Icons.pause_circle,
-                                                    color: kIconColor,
-                                                  ),
-                                                  iconSize: 80.0,
-                                                  onPressed: () {
-                                                    playerManager.pause();
-                                                  },
-                                                );
-                                            }
-                                          },
-                                        ),
-                                        ValueListenableBuilder(
-                                          valueListenable: playerManager.isLastTrackNotifier,
-                                          builder: (_, isLast, __) {
-                                            return IconButton(
-                                              onPressed: () {
-                                                isLast ? null : playerManager.next();
-                                              },
-                                              icon: isLast
-                                                  ? const FaIcon(
-                                                      FontAwesomeIcons.forwardStep,
-                                                      color: kIconColor,
-                                                    )
-                                                  : const FaIcon(
-                                                      FontAwesomeIcons.forwardStep,
-                                                      color: kIconColor,
-                                                    ),
-                                            );
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                    ValueListenableBuilder(
-                                      valueListenable: playerManager.isShuffleModeEnabledNotifier,
-                                      builder: (context, isEnabled, child) {
-                                        return IconButton(
-                                          onPressed: () {
-                                            playerManager.shuffle();
-                                          },
-                                          icon: isEnabled
-                                              ? const FaIcon(
-                                                  Icons.shuffle,
-                                                  color: kIconColor,
-                                                )
-                                              : const FaIcon(Icons.shuffle,
-                                                  color: kDisabledIconColor),
-                                          iconSize: 30,
-                                        );
-                                      },
-                                    ),
-                                  ],
+                                      icon: isFirst
+                                          ? const FaIcon(
+                                              FontAwesomeIcons.backwardStep,
+                                              color: kIconColor,
+                                            )
+                                          : const FaIcon(
+                                              FontAwesomeIcons.backwardStep,
+                                              color: kIconColor,
+                                            ),
+                                    );
+                                  },
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: ValueListenableBuilder<ProgressBarState>(
-                                    valueListenable: playerManager.progressBarNotifier,
-                                    builder: (_, value, __) {
-                                      return _buildProgressBar(value);
-                                    },
-                                  ),
+                                ValueListenableBuilder<PlayButtonState>(
+                                  valueListenable: playerManager.playButtonNotifier,
+                                  builder: (_, value, __) {
+                                    switch (value) {
+                                      case PlayButtonState.loading:
+                                        return IconButton(
+                                          icon: const Icon(
+                                            Icons.pause_circle,
+                                            color: kIconColor,
+                                          ),
+                                          iconSize: 80.0,
+                                          onPressed: () {
+                                            playerManager.pause();
+                                          },
+                                        );
+
+                                      case PlayButtonState.paused:
+                                        return IconButton(
+                                          icon: const Icon(
+                                            Icons.play_circle,
+                                            color: kIconColor,
+                                          ),
+                                          iconSize: 80.0,
+                                          onPressed: () {
+                                            playerManager.play();
+                                          },
+                                        );
+                                      case PlayButtonState.playing:
+                                        return IconButton(
+                                          icon: const Icon(
+                                            Icons.pause_circle,
+                                            color: kIconColor,
+                                          ),
+                                          iconSize: 80.0,
+                                          onPressed: () {
+                                            playerManager.pause();
+                                          },
+                                        );
+                                    }
+                                  },
+                                ),
+                                ValueListenableBuilder(
+                                  valueListenable: playerManager.isLastTrackNotifier,
+                                  builder: (_, isLast, __) {
+                                    return IconButton(
+                                      onPressed: () {
+                                        isLast ? null : playerManager.next();
+                                      },
+                                      icon: isLast
+                                          ? const FaIcon(
+                                              FontAwesomeIcons.forwardStep,
+                                              color: kIconColor,
+                                            )
+                                          : const FaIcon(
+                                              FontAwesomeIcons.forwardStep,
+                                              color: kIconColor,
+                                            ),
+                                    );
+                                  },
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-              ),
-            );
-          },
+                            ValueListenableBuilder(
+                              valueListenable: playerManager.isShuffleModeEnabledNotifier,
+                              builder: (context, isEnabled, child) {
+                                return IconButton(
+                                  onPressed: () {
+                                    playerManager.shuffle();
+                                  },
+                                  icon: isEnabled
+                                      ? const FaIcon(
+                                          Icons.shuffle,
+                                          color: kIconColor,
+                                        )
+                                      : const FaIcon(
+                                          Icons.shuffle,
+                                          color: kDisabledIconColor,
+                                        ),
+                                  iconSize: 30,
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )),
         ),
       ),
     );

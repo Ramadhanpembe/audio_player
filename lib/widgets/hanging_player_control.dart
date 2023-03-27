@@ -4,7 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:marquee/marquee.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
-import '../logics/player_query_resources.dart';
 import '../main.dart';
 import '../notifiers/play_button_notifier.dart';
 import '../screens/player_screen.dart';
@@ -34,7 +33,7 @@ class HangingPlayerControl extends StatelessWidget {
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.6,
               child: ValueListenableBuilder(
-                valueListenable: playerManager.currentTrackIndexNotifier,
+                valueListenable: playerManager.currentTrackIDNotifier,
                 builder: (_, index, __) {
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -43,7 +42,7 @@ class HangingPlayerControl extends StatelessWidget {
                         backgroundColor: Colors.transparent,
                         radius: 25.0,
                         child: QueryArtworkWidget(
-                          id: tracks[index].id,
+                          id: index,
                           type: ArtworkType.AUDIO,
                           nullArtworkWidget: Image.asset(
                             'images/musical_notes.png',
@@ -56,23 +55,22 @@ class HangingPlayerControl extends StatelessWidget {
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.only(left: 8.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
+                          child: ValueListenableBuilder(
+                            valueListenable: playerManager.currentTrackTitleNotifier,
+                            builder: (_, title, __) {
+                              return SizedBox(
                                 height: 60.0,
                                 child: Marquee(
-                                  text: tracks[index].title,
+                                  text: title,
                                   style: const TextStyle(
                                     color: kTileTitleColor,
                                     fontSize: 16.0,
                                   ),
-                                  blankSpace: 15.0,
-                                  velocity: 60.0,
+                                  blankSpace: title.characters.length >= 20 ? 15.0 : 30.0,
+                                  velocity: title.characters.length >= 20 ? 60.0 : 40.0,
                                 ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
                         ),
                       ),

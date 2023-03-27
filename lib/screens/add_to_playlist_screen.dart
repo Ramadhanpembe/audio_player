@@ -48,6 +48,7 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('Add to ${playlists[_playlistIndex].playlistName}'),
         toolbarHeight: 100.0,

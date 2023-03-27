@@ -42,33 +42,33 @@ class _TrackScreenState extends State<TrackScreen> {
               valueListenable: isBackArrowClickedNotifier,
               builder: (_, isClicked, __) {
                 return ValueListenableBuilder(
-                  valueListenable: playerManager.currentTrackIndexNotifier,
-                  builder: (_, currentIndex, __) {
+                  valueListenable: playerManager.currentTrackIDNotifier,
+                  builder: (_, id, __) {
                     return ListTile(
-                      tileColor: isClicked && index == currentIndex
+                      tileColor: isClicked && tracks[index].id == id
                           ? kNowPlayingTileColor
                           : Colors.transparent,
                       visualDensity: VisualDensity.comfortable,
                       leading: RoundedAvatar(
-                          models: tracks,
-                          index: index,
-                          isClicked: isClicked,
-                          currentIndex: currentIndex),
+                        models: tracks,
+                        index: index,
+                        isClicked: isClicked,
+                      ),
                       title: Text(
                         tracks.elementAt(index).title,
-                        style: isClicked && index == currentIndex
+                        style: isClicked && tracks[index].id == id
                             ? kNowPlayingTitleStyle
                             : kTileTitleStyle,
                       ),
                       subtitle: Text(
                         tracks.elementAt(index).album ?? '',
-                        style: isClicked && index == currentIndex
+                        style: isClicked && tracks[index].id == id
                             ? kNowPlayingAlbumStyle
                             : kTileAlbumStyle,
                       ),
                       trailing: IconButton(
                         icon: const Icon(Icons.more_horiz),
-                        color: isClicked && index == currentIndex
+                        color: isClicked && tracks[index].id == id
                             ? kNowPlayingAlbumColor
                             : kTileAlbumColor,
                         onPressed: () async {

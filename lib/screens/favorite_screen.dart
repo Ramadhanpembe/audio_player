@@ -11,14 +11,10 @@ import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:on_audio_room/details/rooms/favorites/favorites_entity.dart';
 
-class FavoriteScreen extends StatefulWidget {
-  const FavoriteScreen({Key? key}) : super(key: key);
+class FavoriteScreen extends StatelessWidget {
+  const FavoriteScreen({super.key, required this.onRemoveToFavorite});
+  final Function(BuildContext, SongModel) onRemoveToFavorite;
 
-  @override
-  State<FavoriteScreen> createState() => _FavoriteScreenState();
-}
-
-class _FavoriteScreenState extends State<FavoriteScreen> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<FavoritesEntity>>(
@@ -32,37 +28,56 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         }
         if (snapshot.hasData) {
           favorites = snapshot.data!;
-
           addedFavorites = queryManager.favoriteToSongAdapter(favorites);
           return ListView.builder(
             itemCount: addedFavorites.length,
             itemBuilder: (context, index) {
-              return ListTile(
-                visualDensity: VisualDensity.comfortable,
-                leading: RoundedAvatar(
-                  models: addedFavorites,
-                  index: index,
-                ),
-                title: Text(
-                  addedFavorites[index].title,
-                  style: kTileTitleStyle,
-                ),
-                subtitle: Text(
-                  addedFavorites[index].album ?? '',
-                  style: kTileAlbumStyle,
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.more_horiz),
-                  color: kTileAlbumColor,
-                  onPressed: () async {
-                    _showModalBottomSheet(index, addedFavorites[index]);
-                  },
-                ),
-                onTap: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
-                  playerManager.setPlaylist(index, addedFavorites);
-                  playerManager.play();
+              return ValueListenableBuilder(
+                valueListenable: isBackArrowClickedNotifier,
+                builder: (_, isClicked, __) {
+                  return ValueListenableBuilder(
+                    valueListenable: playerManager.currentTrackIDNotifier,
+                    builder: (_, id, __) {
+                      return ListTile(
+                        tileColor: isClicked && addedFavorites[index].id == id
+                            ? kNowPlayingTileColor
+                            : Colors.transparent,
+                        visualDensity: VisualDensity.comfortable,
+                        leading: RoundedAvatar(
+                          models: addedFavorites,
+                          index: index,
+                          isClicked: isClicked,
+                        ),
+                        title: Text(
+                          addedFavorites[index].title,
+                          style: isClicked && addedFavorites[index].id == id
+                              ? kNowPlayingTitleStyle
+                              : kTileTitleStyle,
+                        ),
+                        subtitle: Text(
+                          addedFavorites[index].album ?? '',
+                          style: isClicked && addedFavorites[index].id == id
+                              ? kNowPlayingAlbumStyle
+                              : kTileAlbumStyle,
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.more_horiz),
+                          color: isClicked && addedFavorites[index].id == id
+                              ? kNowPlayingAlbumColor
+                              : kTileAlbumColor,
+                          onPressed: () async {
+                            _showModalBottomSheet(index, addedFavorites[index], context);
+                          },
+                        ),
+                        onTap: () {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
+                          playerManager.setPlaylist(index, addedFavorites);
+                          playerManager.play();
+                        },
+                      );
+                    },
+                  );
                 },
               );
             },
@@ -73,7 +88,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     );
   }
 
-  void _showModalBottomSheet(int index, SongModel track) {
+  void _showModalBottomSheet(int index, SongModel track, BuildContext context) {
     showModalBottomSheet(
         isScrollControlled: true,
         context: context,
@@ -96,12 +111,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                     IconButton(
                       color: kIconColor,
                       icon: const Icon(Icons.delete_outline),
-                      onPressed: () {
-                        queryManager.removeFromFavorite(track);
-                        Navigator.pop(context);
-                        setState(() {});
-                        favoritesEntities = queryManager.initFavorites;
-                      },
+                      onPressed: () => onRemoveToFavorite(context, track),
                       iconSize: 40.0,
                     ),
                     const Text(

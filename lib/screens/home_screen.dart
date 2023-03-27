@@ -3,9 +3,11 @@ import 'package:audio_player/screens/playlist_screen.dart';
 import 'package:audio_player/utils/constants.dart';
 import 'package:audio_player/widgets/hanging_player_control.dart';
 import 'package:flutter/material.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 import '../customs/custom_search_delegate.dart';
 import '../logics/player_query_resources.dart';
+import '../main.dart';
 import 'track_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -26,7 +28,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           _tabIndex = _tabController.index;
         });
       });
-
     super.initState();
   }
 
@@ -44,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Scaffold _buildDefaultTabController(BuildContext context) {
     return Scaffold(
       backgroundColor: kScaffoldBackgroundColor,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         systemOverlayStyle: kSystemUiOverlayStyle,
         title: const Text(
@@ -100,10 +102,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   TabBarView _buildTabBarView() {
     return TabBarView(
       controller: _tabController,
-      children: const [
-        TrackScreen(),
-        PlaylistScreen(),
-        FavoriteScreen(),
+      children: [
+        const TrackScreen(),
+        const PlaylistScreen(),
+        FavoriteScreen(
+          onRemoveToFavorite: (BuildContext context, SongModel track) {
+            queryManager.removeFromFavorite(track);
+            Navigator.pop(context);
+            favoritesEntities = queryManager.initFavorites;
+            setState(() {});
+          },
+        ),
       ],
     );
   }

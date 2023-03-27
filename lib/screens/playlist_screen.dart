@@ -3,10 +3,10 @@ import 'package:audio_player/screens/playlist_inside_screen.dart';
 import 'package:audio_player/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:on_audio_query/on_audio_query.dart';
 import 'package:on_audio_room/on_audio_room.dart';
 
 import '../main.dart';
+import '../widgets/playlist_display_icon.dart';
 
 class PlaylistScreen extends StatefulWidget {
   const PlaylistScreen({Key? key}) : super(key: key);
@@ -114,13 +114,14 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
               playlists = snapshot.data!;
               return ListView.builder(
                 itemCount: playlists.length,
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 shrinkWrap: true,
                 itemBuilder: (context, index) {
                   return Column(
                     children: [
                       ListTile(
                         visualDensity: VisualDensity.comfortable,
-                        leading: _buildPlaylistDisplayIcon(index),
+                        leading: PlaylistDisplayIcon(index: index),
                         trailing: Text(
                           _dateFromTimestamp(playlists[index].playlistDateModified),
                           style: kTileAlbumStyle,
@@ -130,8 +131,12 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                           style: kTileTitleStyle.copyWith(fontSize: 18.0),
                         ),
                         onTap: () async {
-                          await Navigator.of(context).push(MaterialPageRoute(
+                          bool? isPopped = await Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) => PlaylistInsideScreen(playlistIndex: index)));
+
+                          if (isPopped ?? true) {
+                            setState(() {});
+                          }
                         },
                         onLongPress: () async {
                           bool? isDeleted = await showDialog(
@@ -143,7 +148,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                                     style: const TextStyle(color: kPrimaryColor),
                                   ),
                                   content: Text(
-                                    'Are you sure you want to delete ${playlists[index].playlistName}?',
+                                    'Delete ${playlists[index].playlistName} permanently?',
                                     style: const TextStyle(color: kPrimaryColor),
                                   ),
                                   actions: [
@@ -182,18 +187,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  QueryArtworkWidget _buildPlaylistDisplayIcon(int index) {
-    return QueryArtworkWidget(
-      id: playlists[index].key,
-      type: ArtworkType.PLAYLIST,
-      nullArtworkWidget: const Icon(
-        Icons.queue_music,
-        size: 50.0,
-        color: kIconColor,
-      ),
     );
   }
 

@@ -14,6 +14,9 @@ class PlayerManager {
   }
 
   final currentTrackIndexNotifier = ValueNotifier<int>(0);
+  final currentTrackTitleNotifier = ValueNotifier<String>('');
+  final currentTrackAlbumNotifier = ValueNotifier<String>('');
+  final currentTrackIDNotifier = ValueNotifier<int>(0);
   final playlistNotifier = ValueNotifier<List<String>>([]);
   final progressBarNotifier = ProgressBarNotifier();
   final repeatButtonNotifier = RepeatButtonNotifier();
@@ -23,73 +26,12 @@ class PlayerManager {
   final isShuffleModeEnabledNotifier = ValueNotifier<bool>(false);
 
   void _init() async {
-    // _listenToChangeInCurrentTrackIndex();
     _listenToPlaybackState();
     _listenToCurrentPosition();
     _listenToBufferedPosition();
     _listenToTotalDuration();
     _listenToChangesInSong();
-    // _listenForChangeInSequenceState();
-    // audioPlayer.playerStateStream.listen((playerState) {
-    //   final isPlaying = playerState.playing;
-    //   final processingState = playerState.processingState;
-    //
-    //   if (processingState == ProcessingState.loading ||
-    //       processingState == ProcessingState.buffering) {
-    //     playButtonNotifier.value = PlayButtonState.loading;
-    //   } else if (!isPlaying) {
-    //     playButtonNotifier.value = PlayButtonState.paused;
-    //   } else if (processingState != ProcessingState.completed) {
-    //     playButtonNotifier.value = PlayButtonState.playing;
-    //   } else {
-    //     audioPlayer.seek(Duration.zero);
-    //     audioPlayer.pause();
-    //   }
-    // });
-    // audioPlayer.positionStream.listen((position) {
-    //   final oldState = progressBarNotifier.value;
-    //   progressBarNotifier.value = ProgressBarState(
-    //     current: position,
-    //     total: oldState.total,
-    //     buffered: oldState.buffered,
-    //   );
-    // });
-    // audioPlayer.bufferedPositionStream.listen((buffered) {
-    //   final oldState = progressBarNotifier.value;
-    //   progressBarNotifier.value = ProgressBarState(
-    //     current: oldState.current,
-    //     total: oldState.total,
-    //     buffered: buffered,
-    //   );
-    // });
-    // audioPlayer.durationStream.listen((total) {
-    //   final oldState = progressBarNotifier.value;
-    //   progressBarNotifier.value = ProgressBarState(
-    //     current: oldState.current,
-    //     total: total ?? Duration.zero,
-    //     buffered: oldState.buffered,
-    //   );
-    // });
   }
-
-  // void _listenToChangeInInitialPlaylist() {
-  //   audioHandler.queue.listen((playlist) {
-  //     if (playlist.isEmpty) return;
-  //     final newList = playlist.map((item) => item.title).toList();
-  //     playlistNotifier.value = newList;
-  //   });
-  // }
-
-  /// This method might not work for the first time - its my own implementation
-  // void _listenToChangeInCurrentTrackIndex() {
-  //   audioHandler.queue.listen((playlist) {
-  //     if (playlist.isEmpty) return;
-  //     for (var item in playlist) {
-  //       final index = item.extras!['tag'];
-  //       currentTrackIndexNotifier.value = index;
-  //     }
-  //   });
-  // }
 
   void _listenToPlaybackState() {
     audioHandler.playbackState.listen((playbackState) {
@@ -144,6 +86,9 @@ class PlayerManager {
   void _listenToChangesInSong() {
     audioHandler.mediaItem.listen((mediaItem) {
       currentTrackIndexNotifier.value = mediaItem?.extras!['tag'] ?? 0;
+      currentTrackIDNotifier.value = mediaItem?.extras!['ID'] ?? 0;
+      currentTrackTitleNotifier.value = mediaItem?.extras!['title'] ?? 'Now Playing';
+      currentTrackAlbumNotifier.value = mediaItem?.extras!['album'] ?? '';
       _updateSkipButtons();
     });
   }
@@ -161,7 +106,6 @@ class PlayerManager {
   }
 
   // Designed to be used in search bar if song is clicked
-  /// Not tested yet - seems to work
   void playSelected(int index, int id) async {
     int trackIndex = 0;
     for (int i = 0; i < tracks.length; i++) {
@@ -191,7 +135,12 @@ class PlayerManager {
         genre: tracks[i].genre,
         artist: tracks[i].artist,
         duration: Duration(milliseconds: tracks[i].duration!),
-        extras: {'uri': '${tracks[i].uri}', 'tag': i},
+        extras: {
+          'uri': '${tracks[i].uri}',
+          'ID': tracks[i].id,
+          'title': tracks[i].title,
+          'album': tracks[i].album,
+        },
       ));
     }
     await audioHandler.addQueueItems(mediaItems);
@@ -199,33 +148,59 @@ class PlayerManager {
   }
 
   /// for playlist use only - will need to implement this method by Audio Handler
-  void setPlaylist(int index, List<SongModel> playlistSongs) async {
-    List<int> playlistTrackIds = [];
-    for (int i = 0; i < playlistSongs.length; i++) {
-      for (var t in tracks) {
-        if (playlistSongs[i].id == t.id) {
-          playlistTrackIds.add(t.id);
-        }
-      }
-    }
-    List<int> indices = [];
-    for (int i = 0; i < tracks.length; i++) {
-      for (int p in playlistTrackIds) {
-        if (tracks[i].id == p) {
-          indices.add(i);
-        }
-      }
-    }
+  // void setPlaylist(int index, List<SongModel> playlistSongs) async {
+  //   // List<int> playlistTrackIds = [];
+  //   // for (int i = 0; i < playlistSongs.length; i++) {
+  //   //   for (var t in tracks) {
+  //   //     if (playlistSongs[i].id == t.id) {
+  //   //       playlistTrackIds.add(t.id);
+  //   //     }
+  //   //   }
+  //   // }
+  //   // List<int> indices = [];
+  //   // for (int i = 0; i < tracks.length; i++) {
+  //   //   for (int p in playlistTrackIds) {
+  //   //     if (tracks[i].id == p) {
+  //   //       indices.add(i);
+  //   //     }
+  //   //   }
+  //   // }
+  //   List<MediaItem> mediaItems = [];
+  //   for (int i = 0; i < playlistSongs.length; i++) {
+  //     mediaItems.add(MediaItem(
+  //       id: '${playlistSongs[i].id}',
+  //       title: playlistSongs[i].title,
+  //       album: playlistSongs[i].album,
+  //       genre: playlistSongs[i].genre,
+  //       artist: playlistSongs[i].artist,
+  //       duration: Duration(milliseconds: playlistSongs[i].duration!),
+  //       extras: {'uri': '${playlistSongs[i].uri}',
+  //         'ID': playlistSongs[i].id,
+  //         'title': playlistSongs[i].title,
+  //         'album': playlistSongs[i].album,
+  //       },
+  //     ));
+  //   }
+  //   await audioHandler.updateQueue(mediaItems);
+  //   await audioHandler.skipToQueueItem(index);
+  // }
+
+  void setPlaylist(int index, List<SongModel> models) async {
     List<MediaItem> mediaItems = [];
-    for (int i = 0; i < indices.length; i++) {
+    for (int i = 0; i < models.length; i++) {
       mediaItems.add(MediaItem(
-        id: '${tracks[indices[i]].id}',
-        title: tracks[indices[i]].title,
-        album: tracks[indices[i]].album,
-        genre: tracks[indices[i]].genre,
-        artist: tracks[indices[i]].artist,
-        duration: Duration(milliseconds: tracks[indices[i]].duration!),
-        extras: {'uri': '${tracks[indices[i]].uri}', 'tag': indices[i]},
+        id: '${models[i].id}',
+        title: models[i].title,
+        album: models[i].album,
+        genre: models[i].genre,
+        artist: models[i].artist,
+        duration: Duration(milliseconds: models[i].duration!),
+        extras: {
+          'uri': '${models[i].uri}',
+          'ID': models[i].id,
+          'title': models[i].title,
+          'album': models[i].album,
+        },
       ));
     }
     await audioHandler.updateQueue(mediaItems);

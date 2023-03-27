@@ -48,6 +48,7 @@ class QueryManager {
   void _init() async {
     audioQuery = OnAudioQuery();
     audioRoom = OnAudioRoom();
+    _requestPermission();
     playlists = <PlaylistEntity>[];
     favorites = <FavoritesEntity>[];
     songModels = initSongs;
@@ -55,7 +56,6 @@ class QueryManager {
 
     /// favorites
     favoritesEntities = initFavorites;
-    _requestPermission();
     tracks = <SongModel>[];
     entities = <SongEntity>[];
   }
@@ -124,8 +124,8 @@ class QueryManager {
     await audioRoom.deletePlaylist(playlistKey);
   }
 
-  void getAllPlaylists() async {
-    await audioRoom.queryPlaylists();
+  void updatePlaylist(PlaylistEntity playlistEntity) async {
+    await audioRoom.updateRoom(RoomType.PLAYLIST, playlistEntity);
   }
 
   void addToFavorite(FavoritesEntity favorite) async {

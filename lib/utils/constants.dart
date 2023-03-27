@@ -69,6 +69,8 @@ const kInfoDialogItemDetailStyle = TextStyle(color: kPrimaryColor, fontSize: 14.
 
 const kTileTitleStyle = TextStyle(fontSize: 16.0, color: kTileTitleColor);
 const kTileAlbumStyle = TextStyle(fontSize: 14.0, color: kTileAlbumColor);
+const kHeaderTitleStyle = TextStyle(fontSize: 18.0, color: Colors.white);
+const kHeaderAlbumStyle = TextStyle(fontSize: 14.0, color: Colors.white70);
 
 const kProgressIndicatorColor = Color(0xffB1D4E0);
 const kMusicIconColor = Colors.white;

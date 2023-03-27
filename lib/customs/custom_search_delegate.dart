@@ -1,8 +1,9 @@
 import 'package:audio_player/screens/playlist_inside_screen.dart';
 import 'package:audio_player/utils/constants.dart';
+import 'package:audio_player/widgets/playlist_display_icon.dart';
+import 'package:audio_player/widgets/rounded_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:on_audio_query/on_audio_query.dart';
 
 import '../logics/player_query_resources.dart';
 import '../main.dart';
@@ -50,24 +51,28 @@ class CustomSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    return Container(
-      color: kSearchDelegateColor,
-      height: MediaQuery.of(context).size.height,
-      child: _buildResults(list ?? []),
+    return Scaffold(
+      backgroundColor: kSearchDelegateColor,
+      resizeToAvoidBottomInset: false,
+      // height: MediaQuery.of(context).size.height,
+      body: _buildResults(list ?? []),
     );
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
     if (query.isNotEmpty) {
-      return Container(
-        color: kSearchDelegateColor,
-        height: MediaQuery.of(context).size.height,
-        child: _buildResults(list ?? []),
+      return Scaffold(
+        backgroundColor: kSearchDelegateColor,
+        resizeToAvoidBottomInset: false,
+        // height: MediaQuery.of(context).size.height,
+        body: _buildResults(list ?? []),
       );
     } else {
-      return Container(
-        color: kSearchDelegateColor,
+      return const Scaffold(
+        backgroundColor: kSearchDelegateColor,
+        resizeToAvoidBottomInset: false,
+        // height: MediaQuery.of(context).size.height,
       );
     }
   }
@@ -111,9 +116,8 @@ class CustomSearchDelegate extends SearchDelegate {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemBuilder: (context, index) {
           return ListTile(
-            // tileColor: kTileColor,
             visualDensity: VisualDensity.comfortable,
-            leading: _buildCircleAvatar(results, index),
+            leading: RoundedAvatar(models: results, index: index),
             title: Text(
               results.elementAt(index).title,
               style: kTileTitleStyle,
@@ -148,9 +152,8 @@ class CustomSearchDelegate extends SearchDelegate {
           if (playlists[i].key == outputs[index].key) playlistIndex = i;
         }
         return ListTile(
-          // tileColor: kTileColor,
           visualDensity: VisualDensity.comfortable,
-          leading: const Icon(Icons.featured_play_list_outlined),
+          leading: PlaylistDisplayIcon(index: index),
           title: Text(
             outputs.elementAt(index).playlistName,
             style: kTileTitleStyle,
@@ -164,23 +167,6 @@ class CustomSearchDelegate extends SearchDelegate {
           },
         );
       },
-    );
-  }
-
-  CircleAvatar _buildCircleAvatar(List<dynamic> models, int index) {
-    return CircleAvatar(
-      backgroundColor: const Color(0xff145DA0),
-      radius: 26.0,
-      child: QueryArtworkWidget(
-        id: models[index].id,
-        type: ArtworkType.AUDIO,
-        nullArtworkWidget: Image.asset(
-          'images/musical_notes.png',
-          filterQuality: FilterQuality.high,
-          fit: BoxFit.contain,
-          color: kMusicIconColor,
-        ),
-      ),
     );
   }
 }
