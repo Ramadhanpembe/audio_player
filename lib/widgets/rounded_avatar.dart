@@ -27,12 +27,14 @@ class RoundedAvatar extends StatelessWidget {
             id: models[index].id,
             type: ArtworkType.AUDIO,
             nullArtworkWidget: Image.asset(
-              'images/musical_notes.png',
+              'images/player_image.png',
+              height: 40,
+              width: 40,
               filterQuality: FilterQuality.high,
               fit: BoxFit.contain,
               color: isClicked! && models[index].id == id
                   ? kNowPlayingMusicIconColor
-                  : kMusicIconColor,
+                  : kTileAlbumColor,
             ),
           ),
         );

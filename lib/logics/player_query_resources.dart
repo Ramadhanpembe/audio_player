@@ -39,6 +39,15 @@ late Future<List<FavoritesEntity>> favoritesEntities;
 
 late Future<List<SongModel>> songModels;
 
+// trying adding albums
+late Future<List<AlbumModel>> albumModels;
+
+late Future<List<SongModel>> albumSongModels;
+
+late List<SongModel> albumSongs;
+
+late List<AlbumModel> albums;
+
 late bool isFavorite;
 
 final isBackArrowClickedNotifier = ValueNotifier<bool>(false);

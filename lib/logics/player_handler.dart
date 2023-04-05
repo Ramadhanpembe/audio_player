@@ -180,6 +180,9 @@ class PlayerHandler extends BaseAudioHandler {
 
   @override
   Future<void> skipToQueueItem(int index) async {
-    await audioPlayer.setAudioSource(concatenatingAudioSource, initialIndex: index);
+    await audioPlayer.setAudioSource(
+      concatenatingAudioSource,
+      initialIndex: index,
+    );
   }
 }

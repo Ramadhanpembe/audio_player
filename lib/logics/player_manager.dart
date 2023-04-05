@@ -17,6 +17,7 @@ class PlayerManager {
   final currentTrackTitleNotifier = ValueNotifier<String>('');
   final currentTrackAlbumNotifier = ValueNotifier<String>('');
   final currentTrackIDNotifier = ValueNotifier<int>(0);
+  final currentPositionNotifier = ValueNotifier<Duration>(Duration.zero);
   final playlistNotifier = ValueNotifier<List<String>>([]);
   final progressBarNotifier = ProgressBarNotifier();
   final repeatButtonNotifier = RepeatButtonNotifier();
@@ -53,6 +54,7 @@ class PlayerManager {
 
   void _listenToCurrentPosition() {
     AudioService.position.listen((position) {
+      currentPositionNotifier.value = position;
       final oldState = progressBarNotifier.value;
       progressBarNotifier.value = ProgressBarState(
         current: position,
@@ -147,7 +149,6 @@ class PlayerManager {
     await audioHandler.skipToQueueItem(index);
   }
 
-  /// for playlist use only - will need to implement this method by Audio Handler
   // void setPlaylist(int index, List<SongModel> playlistSongs) async {
   //   // List<int> playlistTrackIds = [];
   //   // for (int i = 0; i < playlistSongs.length; i++) {
@@ -200,9 +201,11 @@ class PlayerManager {
           'ID': models[i].id,
           'title': models[i].title,
           'album': models[i].album,
+          'tag': i,
         },
       ));
     }
+
     await audioHandler.updateQueue(mediaItems);
     await audioHandler.skipToQueueItem(index);
   }

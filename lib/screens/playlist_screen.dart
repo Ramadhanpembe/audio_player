@@ -49,6 +49,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                     controller.clear();
                     await showDialog(
                       context: context,
+                      barrierDismissible: false,
                       builder: (context) {
                         return AlertDialog(
                           backgroundColor: kDialogColor,
@@ -78,6 +79,9 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                             ),
                             FilledButton(
                               onPressed: () {
+                                queryManager.createPlaylist(controller.text);
+                                playlistEntities = queryManager.initPlaylists;
+                                setState(() {});
                                 Navigator.of(context).pop();
                               },
                               child: const Text('OKAY'),
@@ -86,9 +90,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                         );
                       },
                     );
-                    queryManager.createPlaylist(controller.text);
-                    playlistEntities = queryManager.initPlaylists;
-                    setState(() {});
                   },
                 ),
               ),

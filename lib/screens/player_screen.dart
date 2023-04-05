@@ -151,7 +151,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             artworkBorder: BorderRadius.circular(12),
                             nullArtworkWidget: Image.asset(
                               'images/music_music.png',
-                              color: kMusicTonesColor,
+                              color: kDisabledIconColor,
                               filterQuality: FilterQuality.high,
                             ),
                           ),

@@ -1,3 +1,4 @@
+import 'package:audio_player/screens/album_screen.dart';
 import 'package:audio_player/screens/favorite_screen.dart';
 import 'package:audio_player/screens/playlist_screen.dart';
 import 'package:audio_player/utils/constants.dart';
@@ -22,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   void initState() {
-    _tabController = TabController(vsync: this, length: 3)
+    _tabController = TabController(vsync: this, length: 4)
       ..addListener(() {
         setState(() {
           _tabIndex = _tabController.index;
@@ -105,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       children: [
         const TrackScreen(),
         const PlaylistScreen(),
+        const AlbumScreen(),
         FavoriteScreen(
           onRemoveToFavorite: (BuildContext context, SongModel track) {
             queryManager.removeFromFavorite(track);
@@ -123,12 +125,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       indicatorColor: Colors.white,
       indicatorWeight: 1.5,
       labelColor: Colors.white,
+      labelStyle: const TextStyle(fontSize: 12.0),
       tabs: const [
         Tab(
           text: 'TRACKS',
         ),
         Tab(
           text: 'PLAYLISTS',
+        ),
+        Tab(
+          text: 'ALBUMS',
         ),
         Tab(
           text: 'FAVORITES',

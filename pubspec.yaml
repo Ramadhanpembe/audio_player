@@ -42,10 +42,8 @@ flutter:
   uses-material-design: true
 
   assets:
-    - images/call_recorder_logo.png
-    - images/musical_notes.png
+    - images/player_image.png
     - images/music_music.png
-    - images/nothing_found.png
 
   # example:
   # fonts:

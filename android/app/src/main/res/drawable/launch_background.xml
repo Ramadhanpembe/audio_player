@@ -5,6 +5,6 @@
         <bitmap android:gravity="fill" android:src="@drawable/background"/>
     </item>
     <item>
-        <bitmap android:gravity="center" android:src="@drawable/call_recorder_logo"/>
+        <bitmap android:gravity="center" android:src="@drawable/play_logo"/>
     </item>
 </layer-list>

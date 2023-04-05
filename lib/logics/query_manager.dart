@@ -16,16 +16,27 @@ class QueryManager {
     return await audioRoom.queryPlaylists();
   }
 
-  /// favorites
   Future<List<FavoritesEntity>> get initFavorites async {
     return await audioRoom.queryFavorites();
+  }
 
-    /// amended
-    // List<FavoritesEntity> favoritesEntities = await audioRoom.queryFavorites();
-    // for (FavoritesEntity favorite in favoritesEntities) {
-    //   isFavorite(favorite);
-    // }
-    // return favoritesEntities;
+  /// albums
+  Future<List<AlbumModel>> get initAlbums async {
+    return await audioQuery.queryAlbums(
+        sortType: AlbumSortType.ALBUM,
+        orderType: OrderType.ASC_OR_SMALLER,
+        uriType: UriType.EXTERNAL,
+        ignoreCase: true);
+  }
+
+  Future<List<SongModel>> initAlbumSongs(int index) async {
+    return await audioQuery.queryAudiosFrom(
+      AudiosFromType.ALBUM,
+      albums[index].album,
+      sortType: SongSortType.TITLE,
+      orderType: OrderType.ASC_OR_SMALLER,
+      ignoreCase: true,
+    );
   }
 
   Future<List<SongModel>> get initSongs async {
@@ -58,6 +69,11 @@ class QueryManager {
     favoritesEntities = initFavorites;
     tracks = <SongModel>[];
     entities = <SongEntity>[];
+
+    /// albums
+    albumModels = initAlbums;
+    albums = <AlbumModel>[];
+    albumSongs = <SongModel>[];
   }
 
   void _requestPermission() async {
