@@ -8,6 +8,7 @@ import 'package:on_audio_query/on_audio_query.dart';
 import 'package:on_audio_room/details/extensions/song_map_formatter_extension.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../features/feature_resource.dart';
 import '../logics/player_query_resources.dart';
 import '../widgets/empty_list_indicator.dart';
 import '../widgets/loading_indicator.dart';
@@ -71,67 +72,81 @@ class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
           return const LoadingIndicator();
         }
         tracks = snapshot.data!;
-
         if (tracks.isEmpty) {
           return const EmptyListIndicator();
         }
         entities = queryManager.songToEntityAdapter(tracks);
         return Scrollbar(
-          child: ListView.builder(
-            itemCount: tracks.length,
-            itemBuilder: (context, index) {
-              return ValueListenableBuilder(
-                valueListenable: isBackArrowClickedNotifier,
-                builder: (_, isClicked, __) {
-                  return ValueListenableBuilder(
-                    valueListenable: playerManager.currentTrackIDNotifier,
-                    builder: (_, id, __) {
-                      return ListTile(
-                        tileColor: isClicked && tracks[index].id == id
-                            ? kNowPlayingTileColor
-                            : Colors.transparent,
-                        visualDensity: VisualDensity.comfortable,
-                        leading: RoundedAvatar(
-                          models: tracks,
-                          index: index,
-                          isClicked: isClicked,
-                        ),
-                        title: Text(
-                          tracks.elementAt(index).title,
-                          style: isClicked && tracks[index].id == id
-                              ? kNowPlayingTitleStyle
-                              : kTileTitleStyle,
-                        ),
-                        subtitle: Text(
-                          tracks.elementAt(index).album ?? '',
-                          style: isClicked && tracks[index].id == id
-                              ? kNowPlayingAlbumStyle
-                              : kTileAlbumStyle,
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.more_horiz),
-                          color: isClicked && tracks[index].id == id
-                              ? kNowPlayingAlbumColor
-                              : kTileAlbumColor,
-                          onPressed: () async {
-                            bool isFav = await queryManager.isFavorite(tracks[index]);
-                            _showModalBottomSheet(index, tracks[index], isFav);
-                          },
-                        ),
-                        onTap: () {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
-                          playerManager.setInitialPlaylist(index);
-                          playerManager.play();
-                          setState(() {});
-                        },
-                      );
-                    },
-                  );
-                },
-              );
+          child: ValueListenableBuilder(
+            valueListenable: order.orderStateNotifier,
+            builder: (_, value, __) {
+              if (value == false) {
+                return _buildTrackList(tracks);
+              }
+              return _buildTrackList(tracks, reversed: true);
             },
           ),
+        );
+      },
+    );
+  }
+
+  ListView _buildTrackList(List<dynamic> songs, {bool reversed = false}) {
+    return ListView.builder(
+      itemCount: songs.length,
+      itemBuilder: (context, index) {
+        if (reversed) {
+          index = songs.length - 1 - index;
+        }
+        return ValueListenableBuilder(
+          valueListenable: isBackArrowClickedNotifier,
+          builder: (_, isClicked, __) {
+            return ValueListenableBuilder(
+              valueListenable: playerManager.currentTrackIDNotifier,
+              builder: (_, id, __) {
+                return ListTile(
+                  tileColor: isClicked && songs[index].id == id
+                      ? kNowPlayingTileColor
+                      : Colors.transparent,
+                  visualDensity: VisualDensity.comfortable,
+                  leading: RoundedAvatar(
+                    models: songs,
+                    index: index,
+                    isClicked: isClicked,
+                  ),
+                  title: Text(
+                    songs.elementAt(index).title,
+                    style: isClicked && songs[index].id == id
+                        ? kNowPlayingTitleStyle
+                        : kTileTitleStyle,
+                  ),
+                  subtitle: Text(
+                    songs.elementAt(index).album ?? '',
+                    style: isClicked && songs[index].id == id
+                        ? kNowPlayingAlbumStyle
+                        : kTileAlbumStyle,
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.more_horiz),
+                    color: isClicked && songs[index].id == id
+                        ? kNowPlayingAlbumColor
+                        : kTileAlbumColor,
+                    onPressed: () async {
+                      bool isFav = await queryManager.isFavorite(songs[index]);
+                      _showModalBottomSheet(index, songs[index], isFav);
+                    },
+                  ),
+                  onTap: () {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
+                    playerManager.setInitialPlaylist(index);
+                    playerManager.play();
+                    setState(() {});
+                  },
+                );
+              },
+            );
+          },
         );
       },
     );

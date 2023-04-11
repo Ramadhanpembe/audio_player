@@ -1,4 +1,5 @@
 import 'package:audio_player/customs/play_color.dart';
+import 'package:audio_player/logics/feature_manager.dart';
 import 'package:audio_player/logics/player_handler.dart';
 import 'package:audio_player/logics/query_manager.dart';
 import 'package:audio_player/screens/home_screen.dart';
@@ -24,12 +25,14 @@ class MyApp extends StatefulWidget {
 
 late final PlayerManager playerManager;
 late final QueryManager queryManager;
+late final FeatureManager featureManager;
 
 class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     playerManager = PlayerManager();
     queryManager = QueryManager();
+    featureManager = FeatureManager();
     super.initState();
   }
 

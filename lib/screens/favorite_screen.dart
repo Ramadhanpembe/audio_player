@@ -1,3 +1,4 @@
+import 'package:audio_player/features/feature_resource.dart';
 import 'package:audio_player/logics/player_query_resources.dart';
 import 'package:audio_player/main.dart';
 import 'package:audio_player/screens/player_screen.dart';
@@ -34,62 +35,74 @@ class FavoriteScreen extends StatelessWidget {
             return const EmptyListIndicator();
           }
           return Scrollbar(
-            child: ListView.builder(
-              itemCount: addedFavorites.length,
-              itemBuilder: (context, index) {
-                return ValueListenableBuilder(
-                  valueListenable: isBackArrowClickedNotifier,
-                  builder: (_, isClicked, __) {
-                    return ValueListenableBuilder(
-                      valueListenable: playerManager.currentTrackIDNotifier,
-                      builder: (_, id, __) {
-                        return ListTile(
-                          tileColor: isClicked && addedFavorites[index].id == id
-                              ? kNowPlayingTileColor
-                              : Colors.transparent,
-                          visualDensity: VisualDensity.comfortable,
-                          leading: RoundedAvatar(
-                            models: addedFavorites,
-                            index: index,
-                            isClicked: isClicked,
-                          ),
-                          title: Text(
-                            addedFavorites[index].title,
-                            style: isClicked && addedFavorites[index].id == id
-                                ? kNowPlayingTitleStyle
-                                : kTileTitleStyle,
-                          ),
-                          subtitle: Text(
-                            addedFavorites[index].album ?? '',
-                            style: isClicked && addedFavorites[index].id == id
-                                ? kNowPlayingAlbumStyle
-                                : kTileAlbumStyle,
-                          ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.more_horiz),
-                            color: isClicked && addedFavorites[index].id == id
-                                ? kNowPlayingAlbumColor
-                                : kTileAlbumColor,
-                            onPressed: () async {
-                              _showModalBottomSheet(index, addedFavorites[index], context);
-                            },
-                          ),
-                          onTap: () {
-                            Navigator.of(context).push(
-                                MaterialPageRoute(builder: (context) => const PlayerScreen()));
-                            playerManager.setPlaylist(index, addedFavorites);
-                            playerManager.play();
-                          },
-                        );
-                      },
-                    );
-                  },
-                );
+            child: ValueListenableBuilder(
+              valueListenable: order.orderStateNotifier,
+              builder: (_, value, __) {
+                if (value == false) {
+                  return _buildFavorites(addedFavorites);
+                }
+                return _buildFavorites(addedFavorites, reversed: true);
               },
             ),
           );
         }
         return const EmptyListIndicator();
+      },
+    );
+  }
+
+  ListView _buildFavorites(List<SongModel> list, {bool reversed = false}) {
+    return ListView.builder(
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        if (reversed) {
+          index = list.length - 1 - index;
+        }
+        return ValueListenableBuilder(
+          valueListenable: isBackArrowClickedNotifier,
+          builder: (_, isClicked, __) {
+            return ValueListenableBuilder(
+              valueListenable: playerManager.currentTrackIDNotifier,
+              builder: (_, id, __) {
+                return ListTile(
+                  tileColor: isClicked && addedFavorites[index].id == id
+                      ? kNowPlayingTileColor
+                      : Colors.transparent,
+                  visualDensity: VisualDensity.comfortable,
+                  leading: RoundedAvatar(
+                    models: list,
+                    index: index,
+                    isClicked: isClicked,
+                  ),
+                  title: Text(
+                    list[index].title,
+                    style:
+                        isClicked && list[index].id == id ? kNowPlayingTitleStyle : kTileTitleStyle,
+                  ),
+                  subtitle: Text(
+                    list[index].album ?? '',
+                    style:
+                        isClicked && list[index].id == id ? kNowPlayingAlbumStyle : kTileAlbumStyle,
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.more_horiz),
+                    color:
+                        isClicked && list[index].id == id ? kNowPlayingAlbumColor : kTileAlbumColor,
+                    onPressed: () async {
+                      _showModalBottomSheet(index, list[index], context);
+                    },
+                  ),
+                  onTap: () {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
+                    playerManager.setPlaylist(index, list);
+                    playerManager.play();
+                  },
+                );
+              },
+            );
+          },
+        );
       },
     );
   }

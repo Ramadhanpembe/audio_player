@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:on_audio_room/on_audio_room.dart';
 
+import '../features/feature_resource.dart';
 import '../main.dart';
 import '../widgets/playlist_display_icon.dart';
 
@@ -116,82 +117,99 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                   return const EmptyListIndicator();
                 }
                 playlists = snapshot.data!;
-                return ListView.builder(
-                  itemCount: playlists.length,
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    return Column(
-                      children: [
-                        ListTile(
-                          visualDensity: VisualDensity.comfortable,
-                          leading: PlaylistDisplayIcon(index: index),
-                          trailing: Text(
-                            _dateFromTimestamp(playlists[index].playlistDateModified),
-                            style: kTileAlbumStyle,
-                          ),
-                          title: Text(
-                            playlists[index].playlistName,
-                            style: kTileTitleStyle.copyWith(fontSize: 18.0),
-                          ),
-                          onTap: () async {
-                            bool? isPopped = await Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => PlaylistInsideScreen(playlistIndex: index)));
-
-                            if (isPopped ?? true) {
-                              setState(() {});
-                            }
-                          },
-                          onLongPress: () async {
-                            bool? isDeleted = await showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text(
-                                      'Delete playlist ${playlists[index].playlistName}?',
-                                      style: const TextStyle(color: kBackgroundColor),
-                                    ),
-                                    content: Text(
-                                      'Delete ${playlists[index].playlistName} permanently?',
-                                      style: const TextStyle(color: kBackgroundColor),
-                                    ),
-                                    actions: [
-                                      FilledButton(
-                                        onPressed: () {
-                                          Navigator.pop(context, false);
-                                        },
-                                        child: const Text('CANCEL'),
-                                      ),
-                                      FilledButton(
-                                        onPressed: () {
-                                          queryManager.deletePlaylist(playlists[index].key);
-                                          setState(() {});
-                                          Navigator.pop(context, true);
-                                        },
-                                        child: const Text('YES'),
-                                      ),
-                                    ],
-                                  );
-                                });
-                            if (isDeleted ?? false) {
-                              playlistEntities = queryManager.initPlaylists;
-                              setState(() {});
-                            }
-                          },
-                        ),
-                        const Divider(
-                          thickness: 0.3,
-                          color: Colors.grey,
-                        ),
-                      ],
-                    );
-                  },
+                return Scrollbar(
+                  child: ValueListenableBuilder(
+                    valueListenable: order.orderStateNotifier,
+                    builder: (_, value, __) {
+                      if (value == false) {
+                        return _buildPlaylist(playlists);
+                      }
+                      return _buildPlaylist(playlists, reversed: true);
+                    },
+                  ),
                 );
               },
             ),
           ),
         ],
       ),
+    );
+  }
+
+  ListView _buildPlaylist(List<dynamic> list, {bool reversed = false}) {
+    return ListView.builder(
+      itemCount: list.length,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      shrinkWrap: true,
+      itemBuilder: (context, index) {
+        if (reversed) {
+          index = list.length - 1 - index;
+        }
+        return Column(
+          children: [
+            ListTile(
+              visualDensity: VisualDensity.comfortable,
+              leading: PlaylistDisplayIcon(index: index),
+              trailing: Text(
+                _dateFromTimestamp(list[index].playlistDateModified),
+                style: kTileAlbumStyle,
+              ),
+              title: Text(
+                list[index].playlistName,
+                style: kTileTitleStyle.copyWith(fontSize: 18.0),
+              ),
+              onTap: () async {
+                bool? isPopped = await Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => PlaylistInsideScreen(playlistIndex: index)));
+
+                if (isPopped ?? true) {
+                  setState(() {});
+                }
+              },
+              onLongPress: () async {
+                bool? isDeleted = await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text(
+                          'Delete playlist ${list[index].playlistName}?',
+                          style: const TextStyle(color: kBackgroundColor),
+                        ),
+                        content: Text(
+                          'Delete ${list[index].playlistName} permanently?',
+                          style: const TextStyle(color: kBackgroundColor),
+                        ),
+                        actions: [
+                          FilledButton(
+                            onPressed: () {
+                              Navigator.pop(context, false);
+                            },
+                            child: const Text('CANCEL'),
+                          ),
+                          FilledButton(
+                            onPressed: () {
+                              queryManager.deletePlaylist(list[index].key);
+                              setState(() {});
+                              Navigator.pop(context, true);
+                            },
+                            child: const Text('YES'),
+                          ),
+                        ],
+                      );
+                    });
+                if (isDeleted ?? false) {
+                  playlistEntities = queryManager.initPlaylists;
+                  setState(() {});
+                }
+              },
+            ),
+            const Divider(
+              thickness: 0.3,
+              color: Colors.grey,
+            ),
+          ],
+        );
+      },
     );
   }
 

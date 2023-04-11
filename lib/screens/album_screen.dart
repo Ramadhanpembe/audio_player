@@ -1,3 +1,4 @@
+import 'package:audio_player/features/feature_resource.dart';
 import 'package:audio_player/logics/player_query_resources.dart';
 import 'package:audio_player/main.dart';
 import 'package:audio_player/screens/album_inside_screen.dart';
@@ -60,41 +61,56 @@ class _AlbumScreenState extends State<AlbumScreen> {
           return const EmptyListIndicator();
         }
         return Scrollbar(
-          child: ListView.builder(
-            itemCount: albums.length,
-            itemBuilder: (context, index) {
-              return Column(
-                children: [
-                  ListTile(
-                    visualDensity: VisualDensity.comfortable,
-                    leading: AlbumDisplayIcon(index: index),
-                    trailing: albums[index].numOfSongs <= 1
-                        ? Text('${albums[index].numOfSongs} track', style: kTileAlbumStyle)
-                        : Text('${albums[index].numOfSongs} tracks', style: kTileAlbumStyle),
-                    title: Text(
-                      albums[index].album,
-                      style: kTileTitleStyle,
-                    ),
-                    onTap: () async {
-                      albumSongModels = queryManager.initAlbumSongs(index);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => AlbumInsideScreen(
-                            futureModels: albumSongModels,
-                            albumIndex: index,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const Divider(
-                    thickness: 0.3,
-                    color: Colors.grey,
-                  ),
-                ],
-              );
+          child: ValueListenableBuilder(
+            valueListenable: order.orderStateNotifier,
+            builder: (_, value, __) {
+              if (value == false) {
+                return _buildAlbums(albums);
+              }
+              return _buildAlbums(albums, reversed: true);
             },
           ),
+        );
+      },
+    );
+  }
+
+  ListView _buildAlbums(List<dynamic> list, {bool reversed = false}) {
+    return ListView.builder(
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        if (reversed) {
+          index = list.length - 1 - index;
+        }
+        return Column(
+          children: [
+            ListTile(
+              visualDensity: VisualDensity.comfortable,
+              leading: AlbumDisplayIcon(index: index),
+              trailing: list[index].numOfSongs <= 1
+                  ? Text('${list[index].numOfSongs} track', style: kTileAlbumStyle)
+                  : Text('${list[index].numOfSongs} tracks', style: kTileAlbumStyle),
+              title: Text(
+                list[index].album,
+                style: kTileTitleStyle,
+              ),
+              onTap: () async {
+                albumSongModels = queryManager.initAlbumSongs(index);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => AlbumInsideScreen(
+                      futureModels: albumSongModels,
+                      albumIndex: index,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const Divider(
+              thickness: 0.3,
+              color: Colors.grey,
+            ),
+          ],
         );
       },
     );

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 import '../customs/custom_search_delegate.dart';
+import '../features/feature_resource.dart';
 import '../logics/player_query_resources.dart';
 import '../main.dart';
 import '../utils/constants.dart';
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final TabController _tabController;
   int _tabIndex = 0;
+  bool _isReorderClicked = false;
 
   @override
   void initState() {
@@ -78,18 +80,24 @@ class _HomeScreenState extends State<HomeScreen>
         actions: [
           _tabController.index == 2
               ? const Text('')
-              : Padding(
-                  padding: const EdgeInsets.only(right: 12.0),
-                  child: IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () {
-                      showSearch(
-                        context: context,
-                        delegate: _showCustomSearchDelegate(_tabIndex),
-                      );
-                    },
-                  ),
+              : IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    showSearch(
+                      context: context,
+                      delegate: _showCustomSearchDelegate(_tabIndex),
+                    );
+                  },
                 ),
+          IconButton(
+            icon: const Icon(Icons.reorder_outlined),
+            onPressed: () {
+              setState(() {
+                _isReorderClicked = !_isReorderClicked;
+                order.orderStateNotifier.value = _isReorderClicked;
+              });
+            },
+          ),
         ],
       ),
       body: SafeArea(

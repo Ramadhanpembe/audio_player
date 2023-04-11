@@ -155,43 +155,6 @@ class PlayerManager {
     await audioHandler.skipToQueueItem(index);
   }
 
-  // void setPlaylist(int index, List<SongModel> playlistSongs) async {
-  //   // List<int> playlistTrackIds = [];
-  //   // for (int i = 0; i < playlistSongs.length; i++) {
-  //   //   for (var t in tracks) {
-  //   //     if (playlistSongs[i].id == t.id) {
-  //   //       playlistTrackIds.add(t.id);
-  //   //     }
-  //   //   }
-  //   // }
-  //   // List<int> indices = [];
-  //   // for (int i = 0; i < tracks.length; i++) {
-  //   //   for (int p in playlistTrackIds) {
-  //   //     if (tracks[i].id == p) {
-  //   //       indices.add(i);
-  //   //     }
-  //   //   }
-  //   // }
-  //   List<MediaItem> mediaItems = [];
-  //   for (int i = 0; i < playlistSongs.length; i++) {
-  //     mediaItems.add(MediaItem(
-  //       id: '${playlistSongs[i].id}',
-  //       title: playlistSongs[i].title,
-  //       album: playlistSongs[i].album,
-  //       genre: playlistSongs[i].genre,
-  //       artist: playlistSongs[i].artist,
-  //       duration: Duration(milliseconds: playlistSongs[i].duration!),
-  //       extras: {'uri': '${playlistSongs[i].uri}',
-  //         'ID': playlistSongs[i].id,
-  //         'title': playlistSongs[i].title,
-  //         'album': playlistSongs[i].album,
-  //       },
-  //     ));
-  //   }
-  //   await audioHandler.updateQueue(mediaItems);
-  //   await audioHandler.skipToQueueItem(index);
-  // }
-
   void setPlaylist(int index, List<SongModel> models) async {
     List<MediaItem> mediaItems = [];
     for (int i = 0; i < models.length; i++) {
