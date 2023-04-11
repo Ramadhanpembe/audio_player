@@ -29,58 +29,64 @@ class FavoriteScreen extends StatelessWidget {
         if (snapshot.hasData) {
           favorites = snapshot.data!;
           addedFavorites = queryManager.favoriteToSongAdapter(favorites);
-          return ListView.builder(
-            itemCount: addedFavorites.length,
-            itemBuilder: (context, index) {
-              return ValueListenableBuilder(
-                valueListenable: isBackArrowClickedNotifier,
-                builder: (_, isClicked, __) {
-                  return ValueListenableBuilder(
-                    valueListenable: playerManager.currentTrackIDNotifier,
-                    builder: (_, id, __) {
-                      return ListTile(
-                        tileColor: isClicked && addedFavorites[index].id == id
-                            ? kNowPlayingTileColor
-                            : Colors.transparent,
-                        visualDensity: VisualDensity.comfortable,
-                        leading: RoundedAvatar(
-                          models: addedFavorites,
-                          index: index,
-                          isClicked: isClicked,
-                        ),
-                        title: Text(
-                          addedFavorites[index].title,
-                          style: isClicked && addedFavorites[index].id == id
-                              ? kNowPlayingTitleStyle
-                              : kTileTitleStyle,
-                        ),
-                        subtitle: Text(
-                          addedFavorites[index].album ?? '',
-                          style: isClicked && addedFavorites[index].id == id
-                              ? kNowPlayingAlbumStyle
-                              : kTileAlbumStyle,
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.more_horiz),
-                          color: isClicked && addedFavorites[index].id == id
-                              ? kNowPlayingAlbumColor
-                              : kTileAlbumColor,
-                          onPressed: () async {
-                            _showModalBottomSheet(index, addedFavorites[index], context);
+
+          if (addedFavorites.isEmpty) {
+            return const EmptyListIndicator();
+          }
+          return Scrollbar(
+            child: ListView.builder(
+              itemCount: addedFavorites.length,
+              itemBuilder: (context, index) {
+                return ValueListenableBuilder(
+                  valueListenable: isBackArrowClickedNotifier,
+                  builder: (_, isClicked, __) {
+                    return ValueListenableBuilder(
+                      valueListenable: playerManager.currentTrackIDNotifier,
+                      builder: (_, id, __) {
+                        return ListTile(
+                          tileColor: isClicked && addedFavorites[index].id == id
+                              ? kNowPlayingTileColor
+                              : Colors.transparent,
+                          visualDensity: VisualDensity.comfortable,
+                          leading: RoundedAvatar(
+                            models: addedFavorites,
+                            index: index,
+                            isClicked: isClicked,
+                          ),
+                          title: Text(
+                            addedFavorites[index].title,
+                            style: isClicked && addedFavorites[index].id == id
+                                ? kNowPlayingTitleStyle
+                                : kTileTitleStyle,
+                          ),
+                          subtitle: Text(
+                            addedFavorites[index].album ?? '',
+                            style: isClicked && addedFavorites[index].id == id
+                                ? kNowPlayingAlbumStyle
+                                : kTileAlbumStyle,
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.more_horiz),
+                            color: isClicked && addedFavorites[index].id == id
+                                ? kNowPlayingAlbumColor
+                                : kTileAlbumColor,
+                            onPressed: () async {
+                              _showModalBottomSheet(index, addedFavorites[index], context);
+                            },
+                          ),
+                          onTap: () {
+                            Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) => const PlayerScreen()));
+                            playerManager.setPlaylist(index, addedFavorites);
+                            playerManager.play();
                           },
-                        ),
-                        onTap: () {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
-                          playerManager.setPlaylist(index, addedFavorites);
-                          playerManager.play();
-                        },
-                      );
-                    },
-                  );
-                },
-              );
-            },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           );
         }
         return const EmptyListIndicator();
@@ -98,7 +104,7 @@ class FavoriteScreen extends StatelessWidget {
                 color: kPrimaryColor,
                 border: Border(
                   top: BorderSide(
-                    color: kPrimaryColor,
+                    color: kBackgroundColor,
                     width: 1.0,
                   ),
                 )),
@@ -134,7 +140,7 @@ class FavoriteScreen extends StatelessWidget {
                                 backgroundColor: kDialogColor,
                                 title: const Text(
                                   'Track Details',
-                                  style: TextStyle(color: kPrimaryColor),
+                                  style: TextStyle(color: kBackgroundColor),
                                 ),
                                 actions: [
                                   FilledButton(

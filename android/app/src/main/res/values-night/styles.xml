@@ -21,7 +21,7 @@
 
          This Theme is only used starting with V2 of Flutter's Android embedding. -->
     <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
-        <item name="android:windowBackground">#FFFEFF</item>
+        <item name="android:windowBackground">#0C2D48</item>
         <!--        <item name="android:windowBackground">?android:colorBackground</item>-->
     </style>
 </resources>

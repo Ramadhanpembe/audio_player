@@ -6,6 +6,7 @@ import 'package:audio_player/widgets/track_info_box.dart';
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:on_audio_room/details/extensions/song_map_formatter_extension.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../logics/player_query_resources.dart';
 import '../widgets/empty_list_indicator.dart';
@@ -18,7 +19,43 @@ class TrackScreen extends StatefulWidget {
   State<TrackScreen> createState() => _TrackScreenState();
 }
 
-class _TrackScreenState extends State<TrackScreen> {
+class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
+  bool _isFirstLaunch = true;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkFirstLaunch();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.resumed && _isFirstLaunch) {
+      setState(() {
+        songModels = queryManager.initSongs;
+      });
+    }
+  }
+
+  Future<void> _checkFirstLaunch() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    if (preferences.containsKey('firstLaunch')) {
+      setState(() {
+        _isFirstLaunch = false;
+      });
+    } else {
+      preferences.setBool('firstLaunch', false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return _buildFutureBuilder(context);
@@ -31,64 +68,70 @@ class _TrackScreenState extends State<TrackScreen> {
         if (snapshot.data == null) {
           return const LoadingIndicator();
         } else if (snapshot.data!.isEmpty) {
-          return const EmptyListIndicator();
+          return const LoadingIndicator();
         }
         tracks = snapshot.data!;
+
+        if (tracks.isEmpty) {
+          return const EmptyListIndicator();
+        }
         entities = queryManager.songToEntityAdapter(tracks);
-        return ListView.builder(
-          itemCount: tracks.length,
-          itemBuilder: (context, index) {
-            return ValueListenableBuilder(
-              valueListenable: isBackArrowClickedNotifier,
-              builder: (_, isClicked, __) {
-                return ValueListenableBuilder(
-                  valueListenable: playerManager.currentTrackIDNotifier,
-                  builder: (_, id, __) {
-                    return ListTile(
-                      tileColor: isClicked && tracks[index].id == id
-                          ? kNowPlayingTileColor
-                          : Colors.transparent,
-                      visualDensity: VisualDensity.comfortable,
-                      leading: RoundedAvatar(
-                        models: tracks,
-                        index: index,
-                        isClicked: isClicked,
-                      ),
-                      title: Text(
-                        tracks.elementAt(index).title,
-                        style: isClicked && tracks[index].id == id
-                            ? kNowPlayingTitleStyle
-                            : kTileTitleStyle,
-                      ),
-                      subtitle: Text(
-                        tracks.elementAt(index).album ?? '',
-                        style: isClicked && tracks[index].id == id
-                            ? kNowPlayingAlbumStyle
-                            : kTileAlbumStyle,
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.more_horiz),
-                        color: isClicked && tracks[index].id == id
-                            ? kNowPlayingAlbumColor
-                            : kTileAlbumColor,
-                        onPressed: () async {
-                          bool isFav = await queryManager.isFavorite(tracks[index]);
-                          _showModalBottomSheet(index, tracks[index], isFav);
+        return Scrollbar(
+          child: ListView.builder(
+            itemCount: tracks.length,
+            itemBuilder: (context, index) {
+              return ValueListenableBuilder(
+                valueListenable: isBackArrowClickedNotifier,
+                builder: (_, isClicked, __) {
+                  return ValueListenableBuilder(
+                    valueListenable: playerManager.currentTrackIDNotifier,
+                    builder: (_, id, __) {
+                      return ListTile(
+                        tileColor: isClicked && tracks[index].id == id
+                            ? kNowPlayingTileColor
+                            : Colors.transparent,
+                        visualDensity: VisualDensity.comfortable,
+                        leading: RoundedAvatar(
+                          models: tracks,
+                          index: index,
+                          isClicked: isClicked,
+                        ),
+                        title: Text(
+                          tracks.elementAt(index).title,
+                          style: isClicked && tracks[index].id == id
+                              ? kNowPlayingTitleStyle
+                              : kTileTitleStyle,
+                        ),
+                        subtitle: Text(
+                          tracks.elementAt(index).album ?? '',
+                          style: isClicked && tracks[index].id == id
+                              ? kNowPlayingAlbumStyle
+                              : kTileAlbumStyle,
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.more_horiz),
+                          color: isClicked && tracks[index].id == id
+                              ? kNowPlayingAlbumColor
+                              : kTileAlbumColor,
+                          onPressed: () async {
+                            bool isFav = await queryManager.isFavorite(tracks[index]);
+                            _showModalBottomSheet(index, tracks[index], isFav);
+                          },
+                        ),
+                        onTap: () {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
+                          playerManager.setInitialPlaylist(index);
+                          playerManager.play();
+                          setState(() {});
                         },
-                      ),
-                      onTap: () {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
-                        playerManager.setInitialPlaylist(index);
-                        playerManager.play();
-                        setState(() {});
-                      },
-                    );
-                  },
-                );
-              },
-            );
-          },
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          ),
         );
       },
     );
@@ -106,7 +149,7 @@ class _TrackScreenState extends State<TrackScreen> {
                     color: kPrimaryColor,
                     border: Border(
                       top: BorderSide(
-                        color: kPrimaryColor,
+                        color: kBackgroundColor,
                         width: 1.0,
                       ),
                     )),
@@ -156,7 +199,7 @@ class _TrackScreenState extends State<TrackScreen> {
                                     backgroundColor: kDialogColor,
                                     title: const Text(
                                       'Track Details',
-                                      style: TextStyle(color: kPrimaryColor),
+                                      style: TextStyle(color: kBackgroundColor),
                                     ),
                                     actions: [
                                       FilledButton(

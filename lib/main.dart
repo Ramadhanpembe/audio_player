@@ -1,3 +1,4 @@
+import 'package:audio_player/customs/play_color.dart';
 import 'package:audio_player/logics/player_handler.dart';
 import 'package:audio_player/logics/query_manager.dart';
 import 'package:audio_player/screens/home_screen.dart';
@@ -45,12 +46,23 @@ class _MyAppState extends State<MyApp> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-          colorScheme: ColorScheme.fromSwatch().copyWith(
-        primary: kPrimaryColor,
-      )),
+          scaffoldBackgroundColor: kBackgroundColor,
+          primarySwatch: playColor,
+          appBarTheme: const AppBarTheme().copyWith(
+            systemOverlayStyle: kSystemUiOverlayStyle,
+            toolbarHeight: 100.0,
+          ),
+          checkboxTheme: const CheckboxThemeData().copyWith(
+            fillColor: MaterialStateProperty.all(kTileAlbumColor),
+          ),
+          scrollbarTheme: const ScrollbarThemeData().copyWith(
+            thumbColor: MaterialStateProperty.all(kDisabledIconColor),
+            radius: const Radius.circular(3.0),
+          )),
       home: const HomeScreen(),
     );
   }

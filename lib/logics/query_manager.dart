@@ -8,6 +8,10 @@ class QueryManager {
     _init();
   }
 
+  Future<bool> isPermissionGranted() async {
+    return await audioQuery.permissionsStatus();
+  }
+
   Future<bool> isFavorite(SongModel model) {
     return audioRoom.checkIn(RoomType.FAVORITES, model.id);
   }
@@ -20,7 +24,6 @@ class QueryManager {
     return await audioRoom.queryFavorites();
   }
 
-  /// albums
   Future<List<AlbumModel>> get initAlbums async {
     return await audioQuery.queryAlbums(
         sortType: AlbumSortType.ALBUM,
@@ -64,13 +67,9 @@ class QueryManager {
     favorites = <FavoritesEntity>[];
     songModels = initSongs;
     playlistEntities = initPlaylists;
-
-    /// favorites
     favoritesEntities = initFavorites;
     tracks = <SongModel>[];
     entities = <SongEntity>[];
-
-    /// albums
     albumModels = initAlbums;
     albums = <AlbumModel>[];
     albumSongs = <SongModel>[];

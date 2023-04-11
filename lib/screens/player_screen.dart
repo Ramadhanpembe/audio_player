@@ -55,7 +55,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kScaffoldBackgroundColor,
       appBar: AppBar(
         centerTitle: false,
         toolbarHeight: _toolbarHeight(context),

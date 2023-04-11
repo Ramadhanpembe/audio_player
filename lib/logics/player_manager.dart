@@ -122,7 +122,13 @@ class PlayerManager {
         genre: '${tracks[trackIndex].genre}',
         artist: '${tracks[trackIndex].artist}',
         duration: Duration(milliseconds: tracks[trackIndex].duration ?? 0),
-        extras: {'uri': '${tracks[trackIndex].uri}', 'tag': trackIndex});
+        extras: {
+          'uri': '${tracks[trackIndex].uri}',
+          'ID': tracks[trackIndex].id,
+          'title': tracks[trackIndex].title,
+          'album': tracks[trackIndex].album,
+          'tag': trackIndex
+        });
 
     await audioHandler.addQueueItem(mediaItem);
   }

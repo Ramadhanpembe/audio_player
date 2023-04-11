@@ -1,4 +1,5 @@
 import 'package:audio_player/screens/player_screen.dart';
+import 'package:audio_player/widgets/empty_list_indicator.dart';
 import 'package:audio_player/widgets/error_indicator.dart';
 import 'package:audio_player/widgets/loading_indicator.dart';
 import 'package:audio_player/widgets/rounded_avatar.dart';
@@ -19,24 +20,22 @@ class AlbumInsideScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 100.0,
         title: Text(albums[albumIndex].album),
       ),
       body: SafeArea(
-        child: Container(
-          color: kSearchDelegateColor,
-          child: FutureBuilder(
-            future: futureModels,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const LoadingIndicator();
-              }
-              if (snapshot.hasError) {
-                return const ErrorIndicator();
-              }
-              if (snapshot.hasData) {
-                albumSongs = snapshot.data!;
-                return ListView.builder(
+        child: FutureBuilder(
+          future: futureModels,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const LoadingIndicator();
+            }
+            if (snapshot.hasError) {
+              return const ErrorIndicator();
+            }
+            if (snapshot.hasData) {
+              albumSongs = snapshot.data!;
+              return Scrollbar(
+                child: ListView.builder(
                   itemCount: albumSongs.length,
                   itemBuilder: (context, index) {
                     return ValueListenableBuilder(
@@ -84,12 +83,12 @@ class AlbumInsideScreen extends StatelessWidget {
                       },
                     );
                   },
-                );
-              }
-              return const Text('HI', style: TextStyle(fontSize: 24));
-              // return const EmptyListIndicator();
-            },
-          ),
+                ),
+              );
+            }
+            return const EmptyListIndicator();
+            // return const EmptyListIndicator();
+          },
         ),
       ),
     );

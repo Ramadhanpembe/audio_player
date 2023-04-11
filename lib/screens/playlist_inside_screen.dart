@@ -35,7 +35,6 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        toolbarHeight: 100.0,
         title: Text(playlists[_playlistIndex].playlistName),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -81,7 +80,6 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
       ),
       body: SafeArea(
         child: Container(
-          color: kSearchDelegateColor,
           child: _buildPlaylist(),
         ),
       ),
@@ -102,60 +100,62 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
           addedEntities = snapshot.data!;
           addedTracks = queryManager.entityToSongAdapter(addedEntities);
 
-          return ListView.builder(
-            itemCount: addedTracks.length,
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            itemBuilder: (context, index) {
-              return ValueListenableBuilder(
-                valueListenable: isBackArrowClickedNotifier,
-                builder: (_, isClicked, __) {
-                  return ValueListenableBuilder(
-                    valueListenable: playerManager.currentTrackIDNotifier,
-                    builder: (_, id, __) {
-                      return ListTile(
-                        tileColor: isClicked && addedTracks[index].id == id
-                            ? kNowPlayingTileColor
-                            : Colors.transparent,
-                        visualDensity: VisualDensity.comfortable,
-                        leading: RoundedAvatar(
-                          models: addedTracks,
-                          index: index,
-                          isClicked: isClicked,
-                        ),
-                        title: Text(
-                          addedTracks[index].title,
-                          style: isClicked && addedTracks[index].id == id
-                              ? kNowPlayingTitleStyle
-                              : kTileTitleStyle,
-                        ),
-                        subtitle: Text(
-                          addedTracks[index].album ?? '',
-                          style: isClicked && addedTracks[index].id == id
-                              ? kNowPlayingAlbumStyle
-                              : kTileAlbumStyle,
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.more_horiz),
-                          color: isClicked && addedTracks[index].id == id
-                              ? kNowPlayingAlbumColor
-                              : kTileAlbumColor,
-                          onPressed: () async {
-                            isFavorite = await queryManager.isFavorite(addedTracks[index]);
-                            _showModalBottomSheet(index, addedTracks[index], isFavorite);
+          return Scrollbar(
+            child: ListView.builder(
+              itemCount: addedTracks.length,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              itemBuilder: (context, index) {
+                return ValueListenableBuilder(
+                  valueListenable: isBackArrowClickedNotifier,
+                  builder: (_, isClicked, __) {
+                    return ValueListenableBuilder(
+                      valueListenable: playerManager.currentTrackIDNotifier,
+                      builder: (_, id, __) {
+                        return ListTile(
+                          tileColor: isClicked && addedTracks[index].id == id
+                              ? kNowPlayingTileColor
+                              : Colors.transparent,
+                          visualDensity: VisualDensity.comfortable,
+                          leading: RoundedAvatar(
+                            models: addedTracks,
+                            index: index,
+                            isClicked: isClicked,
+                          ),
+                          title: Text(
+                            addedTracks[index].title,
+                            style: isClicked && addedTracks[index].id == id
+                                ? kNowPlayingTitleStyle
+                                : kTileTitleStyle,
+                          ),
+                          subtitle: Text(
+                            addedTracks[index].album ?? '',
+                            style: isClicked && addedTracks[index].id == id
+                                ? kNowPlayingAlbumStyle
+                                : kTileAlbumStyle,
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.more_horiz),
+                            color: isClicked && addedTracks[index].id == id
+                                ? kNowPlayingAlbumColor
+                                : kTileAlbumColor,
+                            onPressed: () async {
+                              isFavorite = await queryManager.isFavorite(addedTracks[index]);
+                              _showModalBottomSheet(index, addedTracks[index], isFavorite);
+                            },
+                          ),
+                          onTap: () {
+                            Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) => const PlayerScreen()));
+                            playerManager.setPlaylist(index, addedTracks);
+                            playerManager.play();
                           },
-                        ),
-                        onTap: () {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) => const PlayerScreen()));
-                          playerManager.setPlaylist(index, addedTracks);
-                          playerManager.play();
-                        },
-                      );
-                    },
-                  );
-                },
-              );
-            },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           );
         }
         return const EmptyListIndicator();
@@ -180,7 +180,7 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                     color: kPrimaryColor,
                     border: Border(
                       top: BorderSide(
-                        color: kPrimaryColor,
+                        color: kBackgroundColor,
                         width: 1.0,
                       ),
                     )),
@@ -250,7 +250,7 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                                     backgroundColor: kDialogColor,
                                     title: const Text(
                                       'Track Details',
-                                      style: TextStyle(color: kPrimaryColor),
+                                      style: TextStyle(color: kBackgroundColor),
                                     ),
                                     actions: [
                                       FilledButton(
@@ -297,7 +297,7 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
               return AlertDialog(
                 title: const Text(
                   'Rename Playlist',
-                  style: TextStyle(color: kPrimaryColor),
+                  style: TextStyle(color: kBackgroundColor),
                 ),
                 content: Builder(builder: (context) {
                   return SizedBox(
@@ -347,14 +347,14 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
             value: 'Rename playlist',
             child: Text(
               'Rename playlist',
-              style: TextStyle(color: kPrimaryColor),
+              style: TextStyle(color: kBackgroundColor),
             ),
           ),
           const PopupMenuItem(
             value: 'Clear all',
             child: Text(
               'Clear all',
-              style: TextStyle(color: kPrimaryColor),
+              style: TextStyle(color: kBackgroundColor),
             ),
           ),
         ];

@@ -24,6 +24,7 @@ dependencies:
   audio_service: ^0.18.9
   back_button_interceptor: ^6.0.2
   marquee: ^2.2.3
+  shared_preferences: ^2.1.0
 
 
 

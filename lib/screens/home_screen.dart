@@ -1,14 +1,15 @@
 import 'package:audio_player/screens/album_screen.dart';
 import 'package:audio_player/screens/favorite_screen.dart';
 import 'package:audio_player/screens/playlist_screen.dart';
-import 'package:audio_player/utils/constants.dart';
 import 'package:audio_player/widgets/hanging_player_control.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 import '../customs/custom_search_delegate.dart';
 import '../logics/player_query_resources.dart';
 import '../main.dart';
+import '../utils/constants.dart';
 import 'track_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,12 +18,14 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final TabController _tabController;
   int _tabIndex = 0;
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     _tabController = TabController(vsync: this, length: 4)
       ..addListener(() {
         setState(() {
@@ -34,8 +37,26 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Color(0xff0C2D48),
+          statusBarBrightness: Brightness.light,
+          statusBarIconBrightness: Brightness.light,
+          systemNavigationBarIconBrightness: Brightness.light,
+          systemNavigationBarColor: Color(0xff0C2D48),
+          systemNavigationBarDividerColor: Colors.grey,
+        ),
+      );
+    }
   }
 
   @override
@@ -45,29 +66,30 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   Scaffold _buildDefaultTabController(BuildContext context) {
     return Scaffold(
-      backgroundColor: kScaffoldBackgroundColor,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         systemOverlayStyle: kSystemUiOverlayStyle,
+        toolbarHeight: kToolbarHeight,
         title: const Text(
           'Play',
           style: TextStyle(fontSize: 24.0),
         ),
         bottom: _buildTabBar(),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: _showCustomSearchDelegate(_tabIndex),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.dehaze_outlined),
-            onPressed: () {},
-          )
+          _tabController.index == 2
+              ? const Text('')
+              : Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      showSearch(
+                        context: context,
+                        delegate: _showCustomSearchDelegate(_tabIndex),
+                      );
+                    },
+                  ),
+                ),
         ],
       ),
       body: SafeArea(
@@ -93,10 +115,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   CustomSearchDelegate _showCustomSearchDelegate(int tabIndex) {
     if (_tabIndex == 0) {
       return CustomSearchDelegate(list: tracks, tabIndex: _tabIndex);
-    } else if (_tabIndex == 2) {
+    } else if (_tabIndex == 3) {
       return CustomSearchDelegate(list: addedFavorites, tabIndex: _tabIndex);
-    } else {
+    } else if (_tabIndex == 1) {
       return CustomSearchDelegate(list: playlists, tabIndex: _tabIndex);
+    } else {
+      return CustomSearchDelegate(list: albums, tabIndex: _tabIndex);
     }
   }
 

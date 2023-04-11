@@ -4,27 +4,72 @@ import 'package:audio_player/screens/album_inside_screen.dart';
 import 'package:audio_player/utils/constants.dart';
 import 'package:audio_player/widgets/album_display_icon.dart';
 import 'package:audio_player/widgets/empty_list_indicator.dart';
-import 'package:audio_player/widgets/error_indicator.dart';
 import 'package:audio_player/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:on_audio_query/on_audio_query.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AlbumScreen extends StatelessWidget {
+class AlbumScreen extends StatefulWidget {
   const AlbumScreen({Key? key}) : super(key: key);
 
   @override
+  State<AlbumScreen> createState() => _AlbumScreenState();
+}
+
+class _AlbumScreenState extends State<AlbumScreen> with WidgetsBindingObserver {
+  bool _isFirstLaunch = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkFirstLaunch();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed && _isFirstLaunch) {
+      setState(() {
+        albumModels = queryManager.initAlbums;
+      });
+    }
+  }
+
+  Future<void> _checkFirstLaunch() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (prefs.containsKey('firstLaunch')) {
+      setState(() {
+        _isFirstLaunch = false;
+      });
+    } else {
+      prefs.setBool('firstLaunch', false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<List<AlbumModel>>(
       future: albumModels,
       builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
+        if (snapshot.data == null) {
+          return const LoadingIndicator();
+        } else if (snapshot.data!.isEmpty) {
           return const LoadingIndicator();
         }
-        if (snapshot.hasError) {
-          return const ErrorIndicator();
+        albums = snapshot.data!;
+        if (albums.isEmpty) {
+          return const EmptyListIndicator();
         }
-        if (snapshot.hasData) {
-          albums = snapshot.data!;
-          return ListView.builder(
+        return Scrollbar(
+          child: ListView.builder(
             itemCount: albums.length,
             itemBuilder: (context, index) {
               return Column(
@@ -58,9 +103,8 @@ class AlbumScreen extends StatelessWidget {
                 ],
               );
             },
-          );
-        }
-        return const EmptyListIndicator();
+          ),
+        );
       },
     );
   }

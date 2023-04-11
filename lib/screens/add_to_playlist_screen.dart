@@ -51,7 +51,6 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('Add to ${playlists[_playlistIndex].playlistName}'),
-        toolbarHeight: 100.0,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
@@ -70,8 +69,7 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
         ],
       ),
       body: SafeArea(
-        child: Container(
-          color: kSearchDelegateColor,
+        child: Scrollbar(
           child: ListView.builder(
             itemCount: tracks.length,
             itemBuilder: (context, index) {
@@ -79,7 +77,7 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
                 visualDensity: VisualDensity.comfortable,
                 value: isChecked[index],
                 selected: isChecked[index]!,
-                checkColor: kPrimaryColor,
+                checkColor: kBackgroundColor,
                 activeColor: kTileTitleColor,
                 title: Text(
                   tracks.elementAt(index).title,
