@@ -16,29 +16,20 @@ class AlbumScreen extends StatefulWidget {
   State<AlbumScreen> createState() => _AlbumScreenState();
 }
 
-class _AlbumScreenState extends State<AlbumScreen> with WidgetsBindingObserver {
+class _AlbumScreenState extends State<AlbumScreen> {
   bool _isFirstLaunch = true;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _checkFirstLaunch();
+    _updateOnce();
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed && _isFirstLaunch) {
-      setState(() {
-        albumModels = queryManager.initAlbums;
-      });
+  void _updateOnce() {
+    if (_isFirstLaunch) {
+      albumModels = queryManager.initAlbums;
+      setState(() {});
     }
   }
 

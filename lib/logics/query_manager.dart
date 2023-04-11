@@ -45,7 +45,7 @@ class QueryManager {
   Future<List<SongModel>> get initSongs async {
     return audioQuery.querySongs(
       sortType: SongSortType.DISPLAY_NAME,
-      orderType: OrderType.DESC_OR_GREATER,
+      orderType: OrderType.ASC_OR_SMALLER,
       uriType: UriType.EXTERNAL,
       ignoreCase: true,
     );
@@ -63,15 +63,15 @@ class QueryManager {
     audioQuery = OnAudioQuery();
     audioRoom = OnAudioRoom();
     _requestPermission();
-    playlists = <PlaylistEntity>[];
-    favorites = <FavoritesEntity>[];
     songModels = initSongs;
+    albumModels = initAlbums;
     playlistEntities = initPlaylists;
     favoritesEntities = initFavorites;
     tracks = <SongModel>[];
     entities = <SongEntity>[];
-    albumModels = initAlbums;
     albums = <AlbumModel>[];
+    playlists = <PlaylistEntity>[];
+    favorites = <FavoritesEntity>[];
     albumSongs = <SongModel>[];
   }
 
