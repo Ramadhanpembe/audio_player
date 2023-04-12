@@ -23,7 +23,12 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
   }
 
   void _showSnackBar() {
-    const snackBar = SnackBar(content: Center(child: Text('The track is already added!')));
+    const snackBar = SnackBar(
+        content: Center(
+            child: Text(
+      'The track is already added!',
+      style: kTileTitleStyle,
+    )));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
