@@ -37,7 +37,6 @@ class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-
     if (state == AppLifecycleState.resumed && _isFirstLaunch) {
       setState(() {
         songModels = queryManager.initSongs;
