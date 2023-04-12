@@ -42,6 +42,7 @@ class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed && _isFirstLaunch) {
       setState(() {
         songModels = queryManager.initSongs;
+        albumModels = queryManager.initAlbums;
       });
     }
   }

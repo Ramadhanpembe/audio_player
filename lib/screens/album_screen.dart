@@ -8,7 +8,6 @@ import 'package:audio_player/widgets/empty_list_indicator.dart';
 import 'package:audio_player/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AlbumScreen extends StatefulWidget {
   const AlbumScreen({Key? key}) : super(key: key);
@@ -18,32 +17,9 @@ class AlbumScreen extends StatefulWidget {
 }
 
 class _AlbumScreenState extends State<AlbumScreen> {
-  bool _isFirstLaunch = true;
-
   @override
   void initState() {
     super.initState();
-    _checkFirstLaunch();
-    _updateOnce();
-  }
-
-  void _updateOnce() {
-    if (_isFirstLaunch) {
-      albumModels = queryManager.initAlbums;
-      setState(() {});
-    }
-  }
-
-  Future<void> _checkFirstLaunch() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    if (prefs.containsKey('firstLaunch')) {
-      setState(() {
-        _isFirstLaunch = false;
-      });
-    } else {
-      prefs.setBool('firstLaunch', false);
-    }
   }
 
   @override
