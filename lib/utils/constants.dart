@@ -22,7 +22,6 @@ const kHeaderAlbumStyle = TextStyle(fontSize: 14.0, color: Colors.white70);
 
 const kProgressIndicatorColor = Color(0xffB1D4E0);
 const kMusicIconColor = Colors.white;
-
 const kIconColor = Color(0xffB1D4E0);
 const kDisabledIconColor = Color(0x4dB1D4E0);
 const kBackgroundColor = Color(0xe6223C60);

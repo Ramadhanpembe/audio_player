@@ -24,7 +24,7 @@ class _AlbumScreenState extends State<AlbumScreen> {
         if (snapshot.data == null) {
           return const LoadingIndicator();
         } else if (snapshot.data!.isEmpty) {
-          return const LoadingIndicator();
+          return const EmptyListIndicator();
         }
         albums = snapshot.data!;
         if (albums.isEmpty) {

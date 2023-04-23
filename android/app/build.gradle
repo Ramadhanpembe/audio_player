@@ -58,6 +58,9 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
+        ndk {
+            debugSymbolLevel 'FULL'
+        }
     }
 
     signingConfigs {
@@ -71,7 +74,7 @@ android {
     
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
     // Add myself to solve some API deprecations problems

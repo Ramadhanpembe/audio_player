@@ -68,7 +68,7 @@ class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
         if (snapshot.data == null) {
           return const LoadingIndicator();
         } else if (snapshot.data!.isEmpty) {
-          return const LoadingIndicator();
+          return const EmptyListIndicator();
         }
         tracks = snapshot.data!;
 
