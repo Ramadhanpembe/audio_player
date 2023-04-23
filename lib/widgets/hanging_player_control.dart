@@ -38,19 +38,22 @@ class HangingPlayerControl extends StatelessWidget {
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.transparent,
-                        radius: 25.0,
-                        child: QueryArtworkWidget(
-                          id: index,
-                          type: ArtworkType.AUDIO,
-                          nullArtworkWidget: Image.asset(
-                            'images/player_image.png',
-                            height: 40,
-                            width: 40,
-                            filterQuality: FilterQuality.high,
-                            fit: BoxFit.contain,
-                            color: kTileTitleColor,
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: CircleAvatar(
+                          backgroundColor: Colors.transparent,
+                          radius: 25.0,
+                          child: QueryArtworkWidget(
+                            id: index,
+                            type: ArtworkType.AUDIO,
+                            nullArtworkWidget: Image.asset(
+                              'images/player_image.png',
+                              height: 40,
+                              width: 40,
+                              filterQuality: FilterQuality.high,
+                              fit: BoxFit.contain,
+                              color: kTileTitleColor,
+                            ),
                           ),
                         ),
                       ),
