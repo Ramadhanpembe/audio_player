@@ -1,5 +1,6 @@
 import 'package:audio_player/logics/player_query_resources.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:just_audio/just_audio.dart';
 
 Future<AudioHandler> initAudioService() async {
@@ -26,7 +27,11 @@ class PlayerHandler extends BaseAudioHandler {
     _listenForDurationChange();
     _listenForCurrentSongIndexChanges();
     _listenForSequenceStateChanges();
+    _listenOnPlaybackSpeed();
   }
+
+  /// NEW
+  static final speedNotifier = ValueNotifier<double>(1.0);
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
     audioPlayer.playbackEventStream.listen((playbackEvent) {
@@ -102,6 +107,17 @@ class PlayerHandler extends BaseAudioHandler {
       queue.add(items.toList());
     });
   }
+
+  /// NEW
+  void _listenOnPlaybackSpeed() {
+    audioPlayer.speedStream.listen((speed) {
+      speedNotifier.value = speed;
+    });
+  }
+
+  /// NEW
+  @override
+  Future<void> setSpeed(double speed) => audioPlayer.setSpeed(speed);
 
   @override
   Future<void> play() => audioPlayer.play();

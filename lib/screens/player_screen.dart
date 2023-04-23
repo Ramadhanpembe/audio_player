@@ -12,6 +12,7 @@ import '../logics/player_query_resources.dart';
 import '../main.dart';
 import '../notifiers/play_button_notifier.dart';
 import '../notifiers/progress_bar_notifier.dart';
+import '../widgets/alert_popup.dart';
 
 class PlayerScreen extends StatefulWidget {
   const PlayerScreen({super.key});
@@ -23,6 +24,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
   double _toolbarHeight(BuildContext context) {
     return MediaQuery.of(context).size.height / 8;
   }
+
+  double _value = 1.0;
 
   @override
   void initState() {
@@ -179,22 +182,33 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                 ),
                               ),
                               GestureDetector(
-                                child: const Padding(
-                                  padding: EdgeInsets.only(right: 2.0),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 2.0),
                                   child: Text(
-                                    'x1.0',
-                                    style: TextStyle(color: kIconColor),
+                                    '${playerManager.currentPlayingSpeedNotifier.value}x',
+                                    style: const TextStyle(color: kIconColor),
                                   ),
                                 ),
                                 onTap: () {
                                   showDialog(
                                     context: context,
                                     builder: (context) {
-                                      return AlertPopup(
-                                        value: 4.0,
-                                        minimum: 0.0,
-                                        maximum: 10.0,
-                                        onChanged: (value) {},
+                                      return StatefulBuilder(
+                                        builder: (context, StateSetter state) {
+                                          return AlertPopup(
+                                            value: _value,
+                                            minimum: 0.5,
+                                            maximum: 1.5,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                state(() {
+                                                  _value = value;
+                                                });
+                                                playerManager.setSpeed(value);
+                                              });
+                                            },
+                                          );
+                                        },
                                       );
                                     },
                                   );
@@ -384,38 +398,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
       timeLabelTextStyle: const TextStyle(
         color: kTileAlbumColor,
         fontWeight: FontWeight.w500,
-      ),
-    );
-  }
-}
-
-class AlertPopup extends StatelessWidget {
-  const AlertPopup({
-    super.key,
-    required this.value,
-    this.minimum = 0.0,
-    this.maximum = 1.0,
-    required this.onChanged,
-  });
-
-  final double value;
-  final double minimum;
-  final double maximum;
-  final Function(double value) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      content: Container(
-        color: Colors.transparent,
-        height: 1.0,
-        width: MediaQuery.of(context).size.width * 0.6,
-        child: Slider(
-          value: value,
-          onChanged: onChanged,
-          min: minimum,
-          max: maximum,
-        ),
       ),
     );
   }

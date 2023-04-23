@@ -1,3 +1,4 @@
+import 'package:audio_player/logics/player_handler.dart';
 import 'package:audio_player/notifiers/play_button_notifier.dart';
 import 'package:audio_player/notifiers/progress_bar_notifier.dart';
 import 'package:audio_player/notifiers/repeat_button_notifier.dart';
@@ -26,12 +27,16 @@ class PlayerManager {
   final isLastTrackNotifier = ValueNotifier<bool>(true);
   final isShuffleModeEnabledNotifier = ValueNotifier<bool>(false);
 
+  /// NEW
+  final currentPlayingSpeedNotifier = PlayerHandler.speedNotifier;
+
   void _init() async {
     _listenToPlaybackState();
     _listenToCurrentPosition();
     _listenToBufferedPosition();
     _listenToTotalDuration();
     _listenToChangesInSong();
+    // _listenOnPlaybackSpeed();
   }
 
   void _listenToPlaybackState() {
@@ -95,6 +100,11 @@ class PlayerManager {
     });
   }
 
+  // void _listenOnPlaybackSpeed() {
+  //   audioHandler.playbackState
+  //       .listen((playbackState) => currentPlayingSpeedNotifier.value = playbackState.speed);
+  // }
+
   void _updateSkipButtons() {
     final mediaItem = audioHandler.mediaItem.value;
     final playlist = audioHandler.queue.value;
@@ -107,7 +117,6 @@ class PlayerManager {
     }
   }
 
-  // Designed to be used in search bar if song is clicked
   void playSelected(int index, int id) async {
     int trackIndex = 0;
     for (int i = 0; i < tracks.length; i++) {
@@ -154,43 +163,6 @@ class PlayerManager {
     await audioHandler.addQueueItems(mediaItems);
     await audioHandler.skipToQueueItem(index);
   }
-
-  // void setPlaylist(int index, List<SongModel> playlistSongs) async {
-  //   // List<int> playlistTrackIds = [];
-  //   // for (int i = 0; i < playlistSongs.length; i++) {
-  //   //   for (var t in tracks) {
-  //   //     if (playlistSongs[i].id == t.id) {
-  //   //       playlistTrackIds.add(t.id);
-  //   //     }
-  //   //   }
-  //   // }
-  //   // List<int> indices = [];
-  //   // for (int i = 0; i < tracks.length; i++) {
-  //   //   for (int p in playlistTrackIds) {
-  //   //     if (tracks[i].id == p) {
-  //   //       indices.add(i);
-  //   //     }
-  //   //   }
-  //   // }
-  //   List<MediaItem> mediaItems = [];
-  //   for (int i = 0; i < playlistSongs.length; i++) {
-  //     mediaItems.add(MediaItem(
-  //       id: '${playlistSongs[i].id}',
-  //       title: playlistSongs[i].title,
-  //       album: playlistSongs[i].album,
-  //       genre: playlistSongs[i].genre,
-  //       artist: playlistSongs[i].artist,
-  //       duration: Duration(milliseconds: playlistSongs[i].duration!),
-  //       extras: {'uri': '${playlistSongs[i].uri}',
-  //         'ID': playlistSongs[i].id,
-  //         'title': playlistSongs[i].title,
-  //         'album': playlistSongs[i].album,
-  //       },
-  //     ));
-  //   }
-  //   await audioHandler.updateQueue(mediaItems);
-  //   await audioHandler.skipToQueueItem(index);
-  // }
 
   void setPlaylist(int index, List<SongModel> models) async {
     List<MediaItem> mediaItems = [];
@@ -254,5 +226,10 @@ class PlayerManager {
 
   void dispose() {
     audioHandler.stop();
+  }
+
+  /// NEW
+  void setSpeed(double speed) {
+    audioHandler.setSpeed(speed);
   }
 }
