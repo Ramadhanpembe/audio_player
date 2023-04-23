@@ -41,17 +41,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
     return false;
   }
 
-  SongModel getElement(List<SongModel> models, int id) {
-    SongModel song = SongModel({});
-    for (var model in models) {
-      if (model.id == id) {
-        song = model;
-        break;
-      }
-    }
-    return song;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,6 +153,56 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertPopup(
+                                        value: 0.4,
+                                        onChanged: (value) {},
+                                      );
+                                    },
+                                  );
+                                },
+                                padding: const EdgeInsets.fromLTRB(0.0, 8.0, 8.0, 8.0),
+                                constraints: const BoxConstraints(),
+                                icon: const Icon(
+                                  Icons.volume_up,
+                                  color: kIconColor,
+                                ),
+                              ),
+                              GestureDetector(
+                                child: const Padding(
+                                  padding: EdgeInsets.only(right: 2.0),
+                                  child: Text(
+                                    'x1.0',
+                                    style: TextStyle(color: kIconColor),
+                                  ),
+                                ),
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertPopup(
+                                        value: 4.0,
+                                        minimum: 0.0,
+                                        maximum: 10.0,
+                                        onChanged: (value) {},
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
                         ValueListenableBuilder<ProgressBarState>(
                           valueListenable: playerManager.progressBarNotifier,
                           builder: (_, value, __) {
@@ -195,6 +234,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                                     break;
                                 }
                                 return IconButton(
+                                  padding: const EdgeInsets.fromLTRB(0.0, 8.0, 8.0, 8.0),
+                                  constraints: const BoxConstraints(),
                                   onPressed: () {
                                     playerManager.repeat();
                                   },
@@ -291,6 +332,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               valueListenable: playerManager.isShuffleModeEnabledNotifier,
                               builder: (context, isEnabled, child) {
                                 return IconButton(
+                                  padding: const EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 8.0),
+                                  constraints: const BoxConstraints(),
                                   onPressed: () {
                                     playerManager.shuffle();
                                   },
@@ -341,6 +384,38 @@ class _PlayerScreenState extends State<PlayerScreen> {
       timeLabelTextStyle: const TextStyle(
         color: kTileAlbumColor,
         fontWeight: FontWeight.w500,
+      ),
+    );
+  }
+}
+
+class AlertPopup extends StatelessWidget {
+  const AlertPopup({
+    super.key,
+    required this.value,
+    this.minimum = 0.0,
+    this.maximum = 1.0,
+    required this.onChanged,
+  });
+
+  final double value;
+  final double minimum;
+  final double maximum;
+  final Function(double value) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: Container(
+        color: Colors.transparent,
+        height: 1.0,
+        width: MediaQuery.of(context).size.width * 0.6,
+        child: Slider(
+          value: value,
+          onChanged: onChanged,
+          min: minimum,
+          max: maximum,
+        ),
       ),
     );
   }
