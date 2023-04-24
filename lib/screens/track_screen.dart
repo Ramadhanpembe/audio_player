@@ -153,14 +153,15 @@ class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
                         width: 1.0,
                       ),
                     )),
-                height: MediaQuery.of(context).size.height * 0.1,
+                // height: MediaQuery.of(context).size.height * 0.1,
+                height: 70.0,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Column(
                       children: [
                         IconButton(
-                          color: kIconColor,
+                          color: kBackgroundColor,
                           icon: isFavorite
                               ? const Icon(Icons.favorite)
                               : const Icon(Icons.favorite_border),
@@ -177,18 +178,18 @@ class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
                             favoritesEntities = queryManager.initFavorites;
                             setModalState(() {});
                           },
-                          iconSize: 40.0,
+                          iconSize: 30.0,
                         ),
-                        const Text(
+                        Text(
                           'Favorite',
-                          style: kTileTitleStyle,
+                          style: kTileAlbumStyle.copyWith(color: kBackgroundColor),
                         ),
                       ],
                     ),
                     Column(
                       children: [
                         IconButton(
-                          color: kIconColor,
+                          color: kBackgroundColor,
                           icon: const Icon(Icons.info_outline),
                           onPressed: () {
                             Navigator.pop(context);
@@ -199,7 +200,7 @@ class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
                                     backgroundColor: kDialogColor,
                                     title: const Text(
                                       'Track Details',
-                                      style: TextStyle(color: kBackgroundColor),
+                                      style: TextStyle(color: kTileTitleColor),
                                     ),
                                     actions: [
                                       FilledButton(
@@ -216,11 +217,11 @@ class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
                                   );
                                 });
                           },
-                          iconSize: 40.0,
+                          iconSize: 30.0,
                         ),
-                        const Text(
+                        Text(
                           'Info',
-                          style: kTileTitleStyle,
+                          style: kTileAlbumStyle.copyWith(color: kBackgroundColor),
                         ),
                       ],
                     ),

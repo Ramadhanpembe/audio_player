@@ -48,11 +48,11 @@ class _HomeScreenState extends State<HomeScreen>
     if (state == AppLifecycleState.resumed) {
       SystemChrome.setSystemUIOverlayStyle(
         const SystemUiOverlayStyle(
-          statusBarColor: Color(0xff0C2D48),
+          statusBarColor: Color(0xff444349),
           statusBarBrightness: Brightness.light,
           statusBarIconBrightness: Brightness.light,
           systemNavigationBarIconBrightness: Brightness.light,
-          systemNavigationBarColor: Color(0xff0C2D48),
+          systemNavigationBarColor: Color(0xff444349),
           systemNavigationBarDividerColor: Colors.grey,
         ),
       );

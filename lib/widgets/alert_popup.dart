@@ -17,6 +17,9 @@ class AlertPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(35.0),
+      ),
       content: Container(
         color: Colors.transparent,
         height: 20.0,
@@ -24,7 +27,6 @@ class AlertPopup extends StatelessWidget {
         child: Slider(
           value: value,
           onChanged: onChanged,
-          divisions: 10,
           min: minimum,
           max: maximum,
         ),

@@ -15,7 +15,7 @@ class HangingPlayerControl extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xff0C2D48),
+        color: kPrimaryColor,
         border: Border(
           top: BorderSide(
             color: Colors.grey,
@@ -52,7 +52,7 @@ class HangingPlayerControl extends StatelessWidget {
                               width: 40,
                               filterQuality: FilterQuality.high,
                               fit: BoxFit.contain,
-                              color: kTileTitleColor,
+                              color: kBackgroundColor,
                             ),
                           ),
                         ),
@@ -68,7 +68,7 @@ class HangingPlayerControl extends StatelessWidget {
                                 child: Marquee(
                                   text: title,
                                   style: const TextStyle(
-                                    color: kTileTitleColor,
+                                    color: kBackgroundColor,
                                     fontSize: 16.0,
                                   ),
                                   blankSpace: title.characters.length >= 20 ? 15.0 : 30.0,
@@ -89,7 +89,7 @@ class HangingPlayerControl extends StatelessWidget {
             valueListenable: playerManager.isFirstTrackNotifier,
             builder: (_, isFirst, __) {
               return IconButton(
-                color: const Color(0xffB1D4E0),
+                color: kBackgroundColor,
                 onPressed: () {
                   isFirst ? null : playerManager.previous();
                 },
@@ -105,7 +105,7 @@ class HangingPlayerControl extends StatelessWidget {
               switch (value) {
                 case PlayButtonState.loading:
                   return IconButton(
-                    color: const Color(0xffB1D4E0),
+                    color: kBackgroundColor,
                     icon: const Icon(Icons.pause),
                     iconSize: 35.0,
                     onPressed: () {
@@ -115,7 +115,7 @@ class HangingPlayerControl extends StatelessWidget {
 
                 case PlayButtonState.paused:
                   return IconButton(
-                    color: const Color(0xffB1D4E0),
+                    color: kBackgroundColor,
                     icon: const Icon(Icons.play_arrow_rounded),
                     iconSize: 35.0,
                     onPressed: () {
@@ -124,7 +124,7 @@ class HangingPlayerControl extends StatelessWidget {
                   );
                 case PlayButtonState.playing:
                   return IconButton(
-                    color: const Color(0xffB1D4E0),
+                    color: kBackgroundColor,
                     icon: const Icon(Icons.pause),
                     iconSize: 35.0,
                     onPressed: () {
@@ -138,7 +138,7 @@ class HangingPlayerControl extends StatelessWidget {
             valueListenable: playerManager.isLastTrackNotifier,
             builder: (_, isLast, __) {
               return IconButton(
-                color: const Color(0xffB1D4E0),
+                color: kBackgroundColor,
                 onPressed: () {
                   isLast ? null : playerManager.next();
                 },

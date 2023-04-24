@@ -47,7 +47,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                       Icons.playlist_add,
                     ),
                     iconSize: 45.0,
-                    color: kIconColor,
+                    color: Colors.white70,
                     onPressed: () async {
                       controller.clear();
                       await showDialog(
@@ -101,6 +101,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                   style: kTileTitleStyle.copyWith(
                     fontWeight: FontWeight.w500,
                     fontSize: 18.0,
+                    color: Colors.white70,
                   ),
                 ),
               ],

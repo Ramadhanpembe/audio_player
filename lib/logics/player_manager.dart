@@ -26,9 +26,8 @@ class PlayerManager {
   final playButtonNotifier = PlayButtonNotifier();
   final isLastTrackNotifier = ValueNotifier<bool>(true);
   final isShuffleModeEnabledNotifier = ValueNotifier<bool>(false);
-
-  /// NEW
   final currentPlayingSpeedNotifier = PlayerHandler.speedNotifier;
+  final currentPlayingVolumeNotifier = PlayerHandler.volumeNotifier;
 
   void _init() async {
     _listenToPlaybackState();
@@ -36,7 +35,6 @@ class PlayerManager {
     _listenToBufferedPosition();
     _listenToTotalDuration();
     _listenToChangesInSong();
-    // _listenOnPlaybackSpeed();
   }
 
   void _listenToPlaybackState() {
@@ -99,11 +97,6 @@ class PlayerManager {
       _updateSkipButtons();
     });
   }
-
-  // void _listenOnPlaybackSpeed() {
-  //   audioHandler.playbackState
-  //       .listen((playbackState) => currentPlayingSpeedNotifier.value = playbackState.speed);
-  // }
 
   void _updateSkipButtons() {
     final mediaItem = audioHandler.mediaItem.value;
@@ -228,8 +221,11 @@ class PlayerManager {
     audioHandler.stop();
   }
 
-  /// NEW
   void setSpeed(double speed) {
     audioHandler.setSpeed(speed);
+  }
+
+  void setVolume(double volume) {
+    audioHandler.customAction('volume', {'volume': volume});
   }
 }

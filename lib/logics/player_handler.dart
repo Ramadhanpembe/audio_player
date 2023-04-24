@@ -28,10 +28,11 @@ class PlayerHandler extends BaseAudioHandler {
     _listenForCurrentSongIndexChanges();
     _listenForSequenceStateChanges();
     _listenOnPlaybackSpeed();
+    _listenOnPlaybackVolume();
   }
 
-  /// NEW
   static final speedNotifier = ValueNotifier<double>(1.0);
+  static final volumeNotifier = ValueNotifier<double>(0.5);
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
     audioPlayer.playbackEventStream.listen((playbackEvent) {
@@ -87,7 +88,6 @@ class PlayerHandler extends BaseAudioHandler {
     });
   }
 
-  /// you might need to work on this later
   void _listenForCurrentSongIndexChanges() {
     audioPlayer.currentIndexStream.listen((index) {
       final playlist = queue.value;
@@ -108,14 +108,24 @@ class PlayerHandler extends BaseAudioHandler {
     });
   }
 
-  /// NEW
   void _listenOnPlaybackSpeed() {
     audioPlayer.speedStream.listen((speed) {
-      speedNotifier.value = speed;
+      final speedValue = double.parse(speed.toStringAsFixed(1));
+      speedNotifier.value = speedValue;
     });
   }
 
-  /// NEW
+  void _listenOnPlaybackVolume() {
+    audioPlayer.volumeStream.listen((volume) {
+      final volumeLevel = double.parse(volume.toStringAsFixed(1));
+      volumeNotifier.value = volumeLevel;
+    });
+  }
+
+  @override
+  Future<void> customAction(String name, [Map<String, dynamic>? extras]) =>
+      audioPlayer.setVolume(extras!['volume']);
+
   @override
   Future<void> setSpeed(double speed) => audioPlayer.setSpeed(speed);
 
