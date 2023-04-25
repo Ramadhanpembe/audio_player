@@ -55,6 +55,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          _buildPopupMenuButton(),
+        ],
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,7 +143,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             artworkBorder: BorderRadius.circular(12),
                             nullArtworkWidget: Image.asset(
                               'images/music_music.png',
-                              color: kDisabledIconColor,
+                              color: kMusicTonesColor,
                               filterQuality: FilterQuality.high,
                             ),
                           ),
@@ -154,91 +157,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              ValueListenableBuilder(
-                                valueListenable: playerManager.currentPlayingVolumeNotifier,
-                                builder: (_, volume, __) {
-                                  return IconButton(
-                                    onPressed: () {
-                                      showDialog(
-                                        barrierColor: Colors.transparent,
-                                        context: context,
-                                        builder: (context) {
-                                          return StatefulBuilder(
-                                            builder: (context, StateSetter state) {
-                                              return AlertPopup(
-                                                value: volume,
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    state(() => volume = value);
-                                                    playerManager.setVolume(value);
-                                                  });
-                                                },
-                                              );
-                                            },
-                                          );
-                                        },
-                                      );
-                                    },
-                                    padding: const EdgeInsets.fromLTRB(0.0, 8.0, 8.0, 8.0),
-                                    constraints: const BoxConstraints(),
-                                    icon: const Icon(
-                                      Icons.volume_up,
-                                      color: kIconColor,
-                                    ),
-                                  );
-                                },
-                              ),
-                              ValueListenableBuilder(
-                                valueListenable: playerManager.currentPlayingSpeedNotifier,
-                                builder: (_, speed, __) {
-                                  return GestureDetector(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(right: 2.0),
-                                      child: Text(
-                                        '${speed}x',
-                                        style: const TextStyle(color: kIconColor),
-                                      ),
-                                    ),
-                                    onTap: () {
-                                      showDialog(
-                                        barrierColor: Colors.transparent,
-                                        context: context,
-                                        builder: (context) {
-                                          return Positioned(
-                                            left: 0.0,
-                                            right: 0.0,
-                                            top: MediaQuery.of(context).size.height * 0.8,
-                                            child: StatefulBuilder(
-                                              builder: (context, StateSetter state) {
-                                                return AlertPopup(
-                                                  value: speed,
-                                                  minimum: 0.5,
-                                                  maximum: 2.0,
-                                                  onChanged: (value) {
-                                                    setState(() {
-                                                      state(() => speed = value);
-                                                      playerManager.setSpeed(value);
-                                                    });
-                                                  },
-                                                );
-                                              },
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
                         ValueListenableBuilder<ProgressBarState>(
                           valueListenable: playerManager.progressBarNotifier,
                           builder: (_, value, __) {
@@ -395,6 +313,116 @@ class _PlayerScreenState extends State<PlayerScreen> {
               )),
         ),
       ),
+    );
+  }
+
+  PopupMenuButton<dynamic> _buildPopupMenuButton() {
+    return PopupMenuButton(
+      icon: const Icon(
+        Icons.more_vert,
+        color: kHeaderIconColor,
+      ),
+      color: kDialogColor,
+      iconSize: 30.0,
+      onSelected: (value) {
+        if (value == 'speed') {
+          showDialog(
+            barrierColor: Colors.transparent,
+            context: context,
+            builder: (context) {
+              return StatefulBuilder(
+                builder: (context, StateSetter state) {
+                  return ValueListenableBuilder(
+                    valueListenable: playerManager.currentPlayingSpeedNotifier,
+                    builder: (_, speed, __) {
+                      return AlertPopup(
+                        value: speed,
+                        minimum: 0.5,
+                        maximum: 2.0,
+                        onChanged: (value) {
+                          setState(() {
+                            state(() => speed = value);
+                            playerManager.setSpeed(value);
+                          });
+                        },
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          );
+        }
+        if (value == 'volume') {
+          showDialog(
+            barrierColor: Colors.transparent,
+            context: context,
+            builder: (context) {
+              return StatefulBuilder(
+                builder: (context, StateSetter state) {
+                  return ValueListenableBuilder(
+                    valueListenable: playerManager.currentPlayingVolumeNotifier,
+                    builder: (_, volume, __) {
+                      return AlertPopup(
+                        value: volume,
+                        onChanged: (value) {
+                          setState(() {
+                            state(() => volume = value);
+                            playerManager.setVolume(value);
+                          });
+                        },
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          );
+
+          ValueListenableBuilder(
+            valueListenable: playerManager.currentPlayingVolumeNotifier,
+            builder: (_, volume, __) {
+              return IconButton(
+                onPressed: () {},
+                padding: const EdgeInsets.fromLTRB(0.0, 8.0, 8.0, 8.0),
+                constraints: const BoxConstraints(),
+                icon: const Icon(
+                  Icons.volume_up,
+                  color: kIconColor,
+                ),
+              );
+            },
+          );
+        }
+      },
+      itemBuilder: (context) {
+        return <PopupMenuEntry>[
+          PopupMenuItem(
+              value: 'speed',
+              child: ValueListenableBuilder(
+                valueListenable: playerManager.currentPlayingSpeedNotifier,
+                builder: (_, speed, __) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Speed',
+                        style: TextStyle(color: kTileTitleColor),
+                      ),
+                      Text(
+                        '${speed}x',
+                        style: const TextStyle(color: kTileAlbumColor),
+                      )
+                    ],
+                  );
+                },
+              )),
+          const PopupMenuItem(
+            value: 'volume',
+            child: Text('Volume', style: TextStyle(color: kTileTitleColor)),
+          ),
+        ];
+      },
     );
   }
 

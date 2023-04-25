@@ -111,7 +111,7 @@ class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
                         trailing: IconButton(
                           icon: const Icon(Icons.more_horiz),
                           color: isClicked && tracks[index].id == id
-                              ? kNowPlayingAlbumColor
+                              ? kNowPlayingTitleColor
                               : kTileAlbumColor,
                           onPressed: () async {
                             bool isFav = await queryManager.isFavorite(tracks[index]);
@@ -139,6 +139,7 @@ class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
 
   void _showModalBottomSheet(int index, SongModel track, bool isFavorite) {
     showModalBottomSheet(
+        barrierColor: Colors.transparent,
         isScrollControlled: true,
         context: context,
         builder: (context) {
@@ -146,13 +147,8 @@ class _TrackScreenState extends State<TrackScreen> with WidgetsBindingObserver {
             builder: (context, void Function(void Function()) setModalState) {
               return Container(
                 decoration: const BoxDecoration(
-                    color: kPrimaryColor,
-                    border: Border(
-                      top: BorderSide(
-                        color: kBackgroundColor,
-                        width: 1.0,
-                      ),
-                    )),
+                  color: kPrimaryColor,
+                ),
                 // height: MediaQuery.of(context).size.height * 0.1,
                 height: 70.0,
                 child: Row(

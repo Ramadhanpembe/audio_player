@@ -81,7 +81,10 @@ class _HomeScreenState extends State<HomeScreen>
               : Padding(
                   padding: const EdgeInsets.only(right: 12.0),
                   child: IconButton(
-                    icon: const Icon(Icons.search),
+                    icon: const Icon(
+                      Icons.search,
+                      color: kHeaderIconColor,
+                    ),
                     onPressed: () {
                       showSearch(
                         context: context,

@@ -62,7 +62,7 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
               }
             },
             iconSize: 30.0,
-            color: kIconColor,
+            color: kHeaderIconColor,
           ),
           IconButton(
             icon: const Icon(Icons.search),
@@ -73,7 +73,7 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
               );
             },
             iconSize: 30.0,
-            color: kIconColor,
+            color: kHeaderIconColor,
           ),
           _buildPopupMenuButton(context),
         ],
@@ -136,7 +136,7 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                           trailing: IconButton(
                             icon: const Icon(Icons.more_horiz),
                             color: isClicked && addedTracks[index].id == id
-                                ? kNowPlayingAlbumColor
+                                ? kNowPlayingTitleColor
                                 : kTileAlbumColor,
                             onPressed: () async {
                               isFavorite = await queryManager.isFavorite(addedTracks[index]);
@@ -170,6 +170,7 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
 
   void _showModalBottomSheet(int index, SongModel track, bool isFavorite) {
     showModalBottomSheet(
+        barrierColor: Colors.transparent,
         isScrollControlled: true,
         context: context,
         builder: (context) {
@@ -177,21 +178,16 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
             builder: (context, void Function(void Function()) setModalState) {
               return Container(
                 decoration: const BoxDecoration(
-                    color: kPrimaryColor,
-                    border: Border(
-                      top: BorderSide(
-                        color: kBackgroundColor,
-                        width: 1.0,
-                      ),
-                    )),
-                height: MediaQuery.of(context).size.height * 0.1,
+                  color: kPrimaryColor,
+                ),
+                height: 70.0,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Column(
                       children: [
                         IconButton(
-                          color: kIconColor,
+                          color: kBackgroundColor,
                           icon: isFavorite
                               ? const Icon(Icons.favorite)
                               : const Icon(Icons.favorite_border),
@@ -208,18 +204,18 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                             favoritesEntities = queryManager.initFavorites;
                             setModalState(() {});
                           },
-                          iconSize: 40.0,
+                          iconSize: 30.0,
                         ),
-                        const Text(
+                        Text(
                           'Favorite',
-                          style: kTileTitleStyle,
+                          style: kTileAlbumStyle.copyWith(color: kBackgroundColor),
                         ),
                       ],
                     ),
                     Column(
                       children: [
                         IconButton(
-                          color: kIconColor,
+                          color: kBackgroundColor,
                           icon: const Icon(Icons.delete_outline),
                           onPressed: () {
                             setState(() {
@@ -228,18 +224,18 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                             });
                             Navigator.pop(context);
                           },
-                          iconSize: 40.0,
+                          iconSize: 30.0,
                         ),
-                        const Text(
+                        Text(
                           'Remove',
-                          style: kTileTitleStyle,
+                          style: kTileAlbumStyle.copyWith(color: kBackgroundColor),
                         ),
                       ],
                     ),
                     Column(
                       children: [
                         IconButton(
-                          color: kIconColor,
+                          color: kBackgroundColor,
                           icon: const Icon(Icons.info_outline),
                           onPressed: () {
                             Navigator.pop(context);
@@ -250,7 +246,7 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                                     backgroundColor: kDialogColor,
                                     title: const Text(
                                       'Track Details',
-                                      style: TextStyle(color: kBackgroundColor),
+                                      style: TextStyle(color: kTileTitleColor),
                                     ),
                                     actions: [
                                       FilledButton(
@@ -267,11 +263,11 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                                   );
                                 });
                           },
-                          iconSize: 40.0,
+                          iconSize: 30.0,
                         ),
-                        const Text(
+                        Text(
                           'Info',
-                          style: kTileTitleStyle,
+                          style: kTileAlbumStyle.copyWith(color: kBackgroundColor),
                         ),
                       ],
                     ),
@@ -286,7 +282,10 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
   PopupMenuButton<dynamic> _buildPopupMenuButton(BuildContext context) {
     return PopupMenuButton(
       color: kDialogColor,
-      icon: const Icon(Icons.more_vert),
+      icon: const Icon(
+        Icons.more_vert,
+        color: kHeaderIconColor,
+      ),
       iconSize: 30.0,
       onSelected: (value) async {
         controller.clear();
@@ -348,14 +347,14 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
             value: 'Rename playlist',
             child: Text(
               'Rename playlist',
-              style: TextStyle(color: kBackgroundColor),
+              style: TextStyle(color: kTileTitleColor),
             ),
           ),
           const PopupMenuItem(
             value: 'Clear all',
             child: Text(
               'Clear all',
-              style: TextStyle(color: kBackgroundColor),
+              style: TextStyle(color: kTileTitleColor),
             ),
           ),
         ];

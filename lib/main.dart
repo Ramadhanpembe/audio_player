@@ -50,20 +50,26 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        scaffoldBackgroundColor: kBackgroundColor,
-        primarySwatch: playColor,
-        appBarTheme: const AppBarTheme().copyWith(
-          systemOverlayStyle: kSystemUiOverlayStyle,
-          toolbarHeight: 100.0,
-        ),
-        checkboxTheme: const CheckboxThemeData().copyWith(
-          fillColor: MaterialStateProperty.all(kTileAlbumColor),
-        ),
-        scrollbarTheme: const ScrollbarThemeData().copyWith(
-          thumbColor: MaterialStateProperty.all(kDisabledIconColor),
-          radius: const Radius.circular(3.0),
-        ),
-      ),
+          scaffoldBackgroundColor: kBackgroundColor,
+          primarySwatch: playColor,
+          appBarTheme: const AppBarTheme().copyWith(
+            systemOverlayStyle: kSystemUiOverlayStyle,
+            toolbarHeight: 100.0,
+          ),
+          checkboxTheme: const CheckboxThemeData().copyWith(
+            fillColor: MaterialStateProperty.all(kTileAlbumColor),
+          ),
+          scrollbarTheme: const ScrollbarThemeData().copyWith(
+            thumbColor: MaterialStateProperty.all(kDisabledIconColor),
+            radius: const Radius.circular(3.0),
+          ),
+          sliderTheme: const SliderThemeData().copyWith(
+            trackShape: const RectangularSliderTrackShape(),
+            thumbShape: const RoundSliderThumbShape(
+              enabledThumbRadius: 7.0,
+            ),
+            trackHeight: 2.5,
+          )),
       home: const HomeScreen(),
     );
   }

@@ -68,7 +68,7 @@ class FavoriteScreen extends StatelessWidget {
                           trailing: IconButton(
                             icon: const Icon(Icons.more_horiz),
                             color: isClicked && addedFavorites[index].id == id
-                                ? kNowPlayingAlbumColor
+                                ? kNowPlayingTitleColor
                                 : kTileAlbumColor,
                             onPressed: () async {
                               _showModalBottomSheet(index, addedFavorites[index], context);
@@ -96,40 +96,36 @@ class FavoriteScreen extends StatelessWidget {
 
   void _showModalBottomSheet(int index, SongModel track, BuildContext context) {
     showModalBottomSheet(
+        barrierColor: Colors.transparent, // New effect
         isScrollControlled: true,
         context: context,
         builder: (context) {
           return Container(
             decoration: const BoxDecoration(
-                color: kPrimaryColor,
-                border: Border(
-                  top: BorderSide(
-                    color: kBackgroundColor,
-                    width: 1.0,
-                  ),
-                )),
-            height: MediaQuery.of(context).size.height * 0.1,
+              color: kPrimaryColor,
+            ),
+            height: 70.0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Column(
                   children: [
                     IconButton(
-                      color: kIconColor,
+                      color: kBackgroundColor,
                       icon: const Icon(Icons.delete_outline),
                       onPressed: () => onRemoveToFavorite(context, track),
-                      iconSize: 40.0,
+                      iconSize: 30.0,
                     ),
-                    const Text(
+                    Text(
                       'Remove',
-                      style: kTileTitleStyle,
+                      style: kTileAlbumStyle.copyWith(color: kBackgroundColor),
                     ),
                   ],
                 ),
                 Column(
                   children: [
                     IconButton(
-                      color: kIconColor,
+                      color: kBackgroundColor,
                       icon: const Icon(Icons.info_outline),
                       onPressed: () {
                         Navigator.pop(context);
@@ -140,7 +136,7 @@ class FavoriteScreen extends StatelessWidget {
                                 backgroundColor: kDialogColor,
                                 title: const Text(
                                   'Track Details',
-                                  style: TextStyle(color: kBackgroundColor),
+                                  style: TextStyle(color: kTileTitleColor),
                                 ),
                                 actions: [
                                   FilledButton(
@@ -157,11 +153,11 @@ class FavoriteScreen extends StatelessWidget {
                               );
                             });
                       },
-                      iconSize: 40.0,
+                      iconSize: 30.0,
                     ),
-                    const Text(
+                    Text(
                       'Info',
-                      style: kTileTitleStyle,
+                      style: kTileAlbumStyle.copyWith(color: kBackgroundColor),
                     ),
                   ],
                 ),

@@ -61,7 +61,10 @@ class _AddToPlaylistScreenState extends State<AddToPlaylistScreen> {
             padding: const EdgeInsets.only(right: 8.0),
             // Adds tracks to the selected playlist
             child: IconButton(
-              icon: const Icon(Icons.done),
+              icon: const Icon(
+                Icons.done,
+                color: kHeaderIconColor,
+              ),
               onPressed: () async {
                 setState(() {
                   _addEntitiesToPlaylist(_selectedEntities);
