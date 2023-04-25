@@ -58,7 +58,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                             backgroundColor: kDialogColor,
                             title: const Text(
                               'Add New Playlist',
-                              style: TextStyle(color: kBackgroundColor),
+                              style: TextStyle(color: kTileTitleColor),
                             ),
                             content: Builder(builder: (context) {
                               return SizedBox(
@@ -150,11 +150,11 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                                   return AlertDialog(
                                     title: Text(
                                       'Delete playlist ${playlists[index].playlistName}?',
-                                      style: const TextStyle(color: kBackgroundColor),
+                                      style: const TextStyle(color: kTileTitleColor),
                                     ),
                                     content: Text(
                                       'Delete ${playlists[index].playlistName} permanently?',
-                                      style: const TextStyle(color: kBackgroundColor),
+                                      style: const TextStyle(color: kTileTitleColor),
                                     ),
                                     actions: [
                                       FilledButton(

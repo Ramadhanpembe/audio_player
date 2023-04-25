@@ -297,7 +297,7 @@ class _PlaylistInsideScreenState extends State<PlaylistInsideScreen> {
                 backgroundColor: kDialogColor,
                 title: const Text(
                   'Rename Playlist',
-                  style: TextStyle(color: kBackgroundColor),
+                  style: TextStyle(color: kTileTitleColor),
                 ),
                 content: Builder(builder: (context) {
                   return SizedBox(
